@@ -1,0 +1,6 @@
+*.pyc
+*.db
+*.log
+.svn
+media
+.DS_Store
