@@ -4,3 +4,5 @@
 .svn
 media
 .DS_Store
+*.wsgic
+xsettings.py

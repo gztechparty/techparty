@@ -1,3 +1,9 @@
+name: techparty
+version: 2
 libraries:
 - name: "django"
   version: "1.4"
+- name: "wechat"
+  version: "0.2"
+- name: "django-social-auth"
+  version: "0.7.10"
