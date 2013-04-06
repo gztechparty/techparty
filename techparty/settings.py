@@ -125,6 +125,8 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'techparty.event',
     'techparty.wechat',
+    'techparty.website',
+    'social_auth',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -156,8 +158,10 @@ LOGGING = {
     }
 }
 
+TECHPARTY_OFFICIAL_TOKEN = ''
+
 try:
-    #from xsettings import *
+    from xsettings import *
     pass
 except:
     pass
