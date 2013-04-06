@@ -7,3 +7,4 @@ media
 *.wsgic
 xsettings.py
 .ropeproject
+site-packages
