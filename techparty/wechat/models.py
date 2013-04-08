@@ -1,10 +1,13 @@
 #encoding=utf-8
 from django.db import models
+from django.db.models.signals import post_save, post_delete
 from wechat.official import WxTextResponse
 from wechat.official import WxMusicResponse
 from wechat.official import WxNewsResponse
 from wechat.official import WxMusic, WxArticle
 from jsonfield import JSONField
+import pylibmc
+cache = pylibmc.Client()
 
 
 class Command(models.Model):
@@ -82,3 +85,11 @@ class UserState(models.Model):
     class Meta:
         verbose_name = u'用户状态'
         verbose_name_plural = u'用户状态'
+
+
+def clean_command_cache(sender, instance, *args, **kwargs):
+    cache.delete('buildin_commands')
+
+post_save.connect(clean_command_cache, Command, dispatch_uid='clean_command')
+post_delete.connect(clean_command_cache, Command,
+                    dispatch_uid='clean_command_2')

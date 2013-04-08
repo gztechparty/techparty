@@ -2,6 +2,7 @@
 
 from django.db import models
 from django.contrib.auth.models import User
+import time
 
 
 class Event(models.Model):
@@ -18,6 +19,17 @@ class Event(models.Model):
     def __unicode__(self):
         return self.name
 
+    def to_dict(self):
+        ts = time.strftime('%Y年%m月%d日',
+                           self.start_time.timetuple())
+        return {
+            'name': self.name,
+            'description': self.description,
+            'id': self.id,
+            'start_time': ts.decode('utf-8'),
+            'area': self.area,
+        }
+
     class Meta:
         verbose_name = u'活动'
         verbose_name_plural = u'活动'
@@ -27,7 +39,8 @@ class Participate(models.Model):
     user = models.ForeignKey(User)
     event = models.ForeignKey(Event)
     status = models.IntegerField(choices=((0, u'已报名'), (1, u'已确认'),
-                                          (2, u'已付费'), (3, u'已签到')))
+                                          (2, u'已付费'), (3, u'已签到')),
+                                 default=0)
     signup_time = models.DateTimeField(auto_now_add=True)
     confirm_time = models.DateTimeField(blank=True, null=True)
     pay_time = models.DateTimeField(blank=True, null=True)
