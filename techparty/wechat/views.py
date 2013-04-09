@@ -10,8 +10,11 @@ from social_auth.models import UserSocialAuth
 from techparty.wechat.models import Command
 from techparty.wechat.models import UserState
 from techparty.wechat.commands import interactive_cmds
+from techparty.wechat.commands import ICommand
 import random
 import pylibmc
+import inspect
+import traceback
 cache = pylibmc.Client()
 
 
@@ -21,7 +24,8 @@ def log_err():
     print 'full exception'
     print info[0]
     print info[1]
-    print info[2]
+    traceback.print_tb(info[2])
+
 
 class TechpartyView(View, WxApplication):
 
@@ -41,15 +45,32 @@ class TechpartyView(View, WxApplication):
             </xml>
             """ % request.GET['__text__']
             self.debug_mode = True
-            return HttpResponse(self.process(request.GET, xml),
-                                mimetype='text/xml')
+            try:
+                return HttpResponse(self.process(request.GET, xml),
+                                    mimetype='text/xml')
+            except:
+                import sys
+                info = sys.exc_info()
+                if hasattr(self, 'wxstate') and \
+                    getattr(self.wxstate, 'id', ''):
+                    self.wxstate.delete()
+                error = '%s <br/> %s <br/> %s' % (info[0], info[1],
+                                                  traceback.format_tb(info[2]))
+                return HttpResponse(error)
         else:
             return HttpResponse(self.process(request.GET))
 
     def post(self, request):
         print 'begin post'
         print request.body
-        return HttpResponse(self.process(request.GET, request.body))
+        try:
+            rsp = self.process(request.GET, request.body)
+            return HttpResponse(rsp)
+        except:
+            log_err()
+            if hasattr(self, 'wxstate') and self.wxstate.id:
+                self.wxstate.delete()
+            return HttpResponse('error request')
 
     def get_actions(self):
         actionMap = {}
@@ -80,7 +101,7 @@ class TechpartyView(View, WxApplication):
         if self.wxstate:
             command = interactive_cmds[self.wxstate.command]
             return command.execute(self.wxreq, self.user,
-                                       self.wxstate)
+                                   self.wxstate)
         else:
             print 'no wxstate found'
             command = self.get_actions().get(text.Content)
@@ -98,10 +119,13 @@ class TechpartyView(View, WxApplication):
             if isinstance(command, Command):
                 print 'return command'
                 return command.as_response(text)
-            else:
+            elif inspect.isclass(command) and issubclass(command, ICommand):
                 print u'excute command with state %s' % self.wxstate
                 return command.execute(self.wxreq, self.user,
                                        self.wxstate)
+            else:
+                print u'make a function call'
+                return command(self.wxreq, self.user)
 
     def on_image(self):
         pass

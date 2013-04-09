@@ -15,6 +15,8 @@ class Event(models.Model):
     sponsor = models.ForeignKey(User, blank=True, null=True)
     area = models.IntegerField(choices=((0, u'广州'),
                                         (1, u'深圳'), (2, u'珠海')))
+    url = models.URLField(blank=True, null=True)
+    image = models.URLField(blank=True, null=True)
 
     def __unicode__(self):
         return self.name
@@ -52,6 +54,7 @@ class Participate(models.Model):
     class Meta:
         verbose_name = u'参会纪录'
         verbose_name_plural = u'参会纪录'
+        unique_together = ('user', 'event')
 
 
 class Tweet(models.Model):
