@@ -62,8 +62,6 @@ class TechpartyView(View, WxApplication):
             return HttpResponse(self.process(request.GET))
 
     def post(self, request):
-        print 'begin post'
-        print request.body
         try:
             rsp = self.process(request.GET, request.body)
             return HttpResponse(rsp)
@@ -102,13 +100,10 @@ class TechpartyView(View, WxApplication):
         - 先检查用户当前的状态（State）。如果用户带状态，则优先交给状态机处理
         - 用户无状态，则交由命令处理器分配处理。
         """
-        print u'on text wxstate %s' % self.wxstate
         if self.wxstate:
             return self.resume()
         else:
-            print 'no wxstate found'
             command = self.get_actions().get(text.Content)
-            print 'command %s' % command
             if not command:
                 # 尝试一下模糊匹配
                 blurs = [(k, v) for k, v in self.get_actions().iteritems()
@@ -120,14 +115,11 @@ class TechpartyView(View, WxApplication):
                 if not command:
                     return WxTextResponse(u'感谢您的反馈', text)
             if isinstance(command, Command):
-                print 'return command'
                 return command.as_response(text)
             elif inspect.isclass(command) and issubclass(command, ICommand):
-                print u'excute command with state %s' % self.wxstate
                 return command.execute(self.wxreq, self.user,
                                        self.wxstate)
             else:
-                print u'make a function call'
                 return command(self.wxreq, self.user)
 
     def on_image(self, image):
@@ -152,7 +144,6 @@ class TechpartyView(View, WxApplication):
         """
         social = UserSocialAuth.objects.filter(provider='weixin',
                                                uid=self.wxreq.FromUserName)
-        print 'social get? %s' % social
         if social:
             social = social[0]
             self.user = social.user
@@ -169,10 +160,8 @@ class TechpartyView(View, WxApplication):
                 social.save()
             except:
                 log_err()
-        print u'social user %s' % social.user
         try:
             self.wxstate = UserState.objects.get(user=social.user.username)
         except:
             log_err()
             self.wxstate = None
-        print u'wxstate %s' % self.wxstate
