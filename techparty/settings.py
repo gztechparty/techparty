@@ -159,6 +159,7 @@ LOGGING = {
 }
 
 TECHPARTY_OFFICIAL_TOKEN = ''
+EMAIL_BACKEND = 'techparty.email.SAEEmailBackend'
 
 try:
     from xsettings import *

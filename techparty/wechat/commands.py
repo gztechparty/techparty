@@ -71,6 +71,8 @@ class ICommand(object):
             retry = '%s_retry' % self.state.state
             self.state.context[retry] = self.state.context.get(retry, 0) + 1
             self.state.save()
+            if self.state.context.get('error', ''):
+                return WxTextResponse(self.state.context['error'], self.wxreq)
             return getattr(self, func)()
 
     def should_transit(self, branch):
@@ -168,6 +170,8 @@ class RegisterEvent(ICommand):
                         range(len(self.state.context['events']))
                 except:
                     return False
+            else:
+                self.state.context['error'] = u'请输入文字'
         return False
 
     def end(self):
@@ -253,9 +257,6 @@ class ProfileEdit(ICommand):
         """
         会有多次进入该状态。每次判断修改到哪个信息了，显示不同的提示。
         """
-        if self.state.context.get('error', ''):
-            error = self.state.context['error']
-            return WxTextResponse(error, self.wxreq)
         data = self.state.context.get('data', {})
         original = self.state.context['original_data']
         for field in self.PROFILE_FIELDS:
@@ -274,16 +275,17 @@ class ProfileEdit(ICommand):
         next = self.find_next_field()
         if next < 0:
             return True
+        if self.wxreq.MsgType != 'text':
+            self.state.context['error'] = u'请输入文字'
+            return False
         data = self.state.context.get('data', {})
         field = self.PROFILE_FIELDS[next]
         if self.wxreq.Content == 's':
-            # 用户选择跳过
             value = self.state.context['original_data'].get(field[0], '')
             data[field[0]] = value
         elif len(field) > 2:
             error = self.validate_value_for_field(self.wxreq.Content, field[2])
             if error:
-                print 'validate error'
                 self.state.context['error'] = error
                 return False
         if field[0] not in data:
