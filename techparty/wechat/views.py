@@ -33,6 +33,7 @@ class TechpartyView(View, WxApplication):
 
     def get(self, request):
         if '__text__' in request.GET and '__code__' in request.GET:
+            # Test only！
             if request.GET['__code__'] != settings.DEBUG_SECRET:
                 return HttpResponse(u'invalid debug code')
             xml = """<xml>
@@ -51,8 +52,8 @@ class TechpartyView(View, WxApplication):
             except:
                 import sys
                 info = sys.exc_info()
-                if hasattr(self, 'wxstate') and \
-                    getattr(self.wxstate, 'id', ''):
+                if hasattr(self, 'wxstate') and getattr(self.wxstate,
+                                                        'id', ''):
                     self.wxstate.delete()
                 error = '%s <br/> %s <br/> %s' % (info[0], info[1],
                                                   traceback.format_tb(info[2]))
@@ -92,6 +93,10 @@ class TechpartyView(View, WxApplication):
         else:
             return super(TechpartyView, self).is_valid_params(auth_params)
 
+    def resume(self):
+        command = interactive_cmds[self.wxstate.command]
+        return command.execute(self.wxreq, self.user, self.wxstate)
+
     def on_text(self, text):
         """处理用户发来的文本，
         - 先检查用户当前的状态（State）。如果用户带状态，则优先交给状态机处理
@@ -99,9 +104,7 @@ class TechpartyView(View, WxApplication):
         """
         print u'on text wxstate %s' % self.wxstate
         if self.wxstate:
-            command = interactive_cmds[self.wxstate.command]
-            return command.execute(self.wxreq, self.user,
-                                   self.wxstate)
+            return self.resume()
         else:
             print 'no wxstate found'
             command = self.get_actions().get(text.Content)
@@ -127,14 +130,20 @@ class TechpartyView(View, WxApplication):
                 print u'make a function call'
                 return command(self.wxreq, self.user)
 
-    def on_image(self):
-        pass
+    def on_image(self, image):
+        return self.resume() if self.wxstate else \
+            WxTextResponse(u'好图！谢谢亲！更多妹子图有请！',
+                           self.wxreq)
 
-    def on_link(self):
-        pass
+    def on_link(self, link):
+        return self.resume() if self.wxstate else \
+            WxTextResponse(u'感谢分享！俺一定会好好学习的！',
+                           self.wxreq)
 
-    def on_location(self):
-        pass
+    def on_location(self, location):
+        if self.wxstate:
+            return self.resume()
+        return WxTextResponse(u'请站在原地等候，咱们不见不散！', self.wxreq)
 
     def pre_process(self):
         """在处理命令前检查用户的状态。

@@ -30,7 +30,6 @@ def register_cmd(command, name=None, alias=None):
 class ICommand(object):
     """交互式命令的基类
     """
-
     TRANSIT_MAP = {}
     COMMAND_NAME = 'noname'
     COMMAND_ALIAS = 'nn'
@@ -44,27 +43,21 @@ class ICommand(object):
         self.user = user
         self.state = state
 
+    def validate_transit_map(self):
+        pass
+
     def process(self):
         if not self.state:
             self.state = UserState(user=self.user, command=self.COMMAND_NAME,
                                    state='start', context={})
             self.start()
-
         assert self.TRANSIT_MAP, 'No TRANSIT_MAP define!'
         branches = self.TRANSIT_MAP.get(self.state.state, '')
-        print 'branches of state %s : %s' % (self.state.state, branches)
-        if not branches:
-            print 'no branches?'
-            # 做些容错？如果上次的end或cancel没有删除掉。
-            return self.end()
         func = None
-        print 'before checking branch'
         for branch in branches:
             if self.should_transit(branch):
                 func = 'enter_%s_state' % branch[0]
-                print 'check func if exsit: %s' % func
                 ret = getattr(self, func)()
-                print 'the return result %s ' % ret
                 if branch[0] in ('end', 'cancel') and self.state.id:
                     self.state.delete()
                 elif branch[0] != 'start' and branch[0] not in ('end',
@@ -72,9 +65,7 @@ class ICommand(object):
                     self.state.state = branch[0]
                     self.state.save()
                 return ret
-
         if not func:
-            print 'should not traisit, stay where you are'
             # 不好意思，原地踏步，继续。
             func = 'enter_%s_state' % self.state.state
             retry = '%s_retry' % self.state.state
@@ -115,7 +106,6 @@ class ICommand(object):
         return self.end()
 
     def enter_cancel_state(self):
-        print 'enter cancel state'
         return self.cancel()
 
 
@@ -130,27 +120,22 @@ class RegisterEvent(ICommand):
         'start': (('confirm', {}), ('choose', {}), ('end', {})),
         'confirm': (('end', {'Content': '1'}), ('cancel', {'Content': '0'})),
         'choose': (('end', {}), ('cancel', {'Content': 'c'})),
-        'end': [],
-        'cancel': [],
     }
 
     def start(self):
         events = Event.objects.filter(start_time__gt=datetime.now())
-        print 'events %s' % events
         self.state.context['events'] = [e.to_dict() for e in events]
         self.state.context['has_info'] = self.user.first_name or \
             self.user.email
-        print 'context %s' % self.state.context
 
     ################ Confirm State ################
 
     def should_enter_confirm_state(self):
         return len(self.state.context.get('events', [])) == 1 and \
-               self.state.context.get('has_info', False)
+            self.state.context.get('has_info', False)
 
     def enter_confirm_state(self):
         event = self.state.context['events'][0]
-        print event
         ct = u'您确认报名参加在%s举行的"%s"？确认请回复1，取消请回复0' % (
             event['start_time'], event['name'])
         return WxTextResponse(ct, self.wxreq)
@@ -159,7 +144,7 @@ class RegisterEvent(ICommand):
 
     def should_enter_choose_state(self):
         return len(self.state.context.get('events', [])) > 1 and \
-               self.state.context.get('has_info', False)
+            self.state.context.get('has_info', False)
 
     def enter_choose_state(self):
         ct = u'目前有两个活动正接受报名，请输入活动序号完成报名,输入c退出:'
@@ -174,7 +159,6 @@ class RegisterEvent(ICommand):
 
     def should_enter_end_state(self):
         if self.state.state == 'start':
-            print 'context %s' % self.state.context
             return (not self.state.context.get('events', [])) or \
                    (not self.state.context.get('has_info', False))
         elif self.state.state == 'choose':
@@ -187,7 +171,6 @@ class RegisterEvent(ICommand):
         return False
 
     def end(self):
-        print 'end this process state: %s' % self.state.state
         if self.state.state == 'start':
             if self.state.context['has_info']:
                 return WxTextResponse(u'近期暂无活动，感谢您的关注',
@@ -203,7 +186,6 @@ class RegisterEvent(ICommand):
             try:
                 pt.save()
             except IntegrityError:
-                print '保存保名出错了？'
                 info = sys.exc_info()
                 print info[0], info[1], info[2]
             except:
@@ -213,7 +195,6 @@ class RegisterEvent(ICommand):
             return WxTextResponse(ct, self.wxreq)
 
     def cancel(self):
-        print 'cancel it!'
         return WxTextResponse(u'您已取消报名,感谢关注', self.wxreq)
 
 
@@ -227,8 +208,6 @@ class ProfileEdit(ICommand):
     TRANSIT_MAP = {
         'start': (('edit', {}),),
         'edit': (('end', {}), ('cancel', {'Content': 'c'})),
-        'end': [],
-        'cancel': []
     }
 
     PROFILE_FIELDS = (('name', u'姓名', {'max_length': 10}),
@@ -292,7 +271,6 @@ class ProfileEdit(ICommand):
         如果未修改完，则继续，否则结束。
         如果用户选择跳过，则进入结束
         """
-
         next = self.find_next_field()
         if next < 0:
             return True
@@ -357,11 +335,12 @@ def user_info(wxreq, user):
 回复ei可以进行修改。""" % (user.first_name, user.email)
     return WxTextResponse(ct, wxreq)
 
+
 def register_events(wxreq, user):
     """返回已经报名的活动
     """
     pts = Participate.objects.filter(user=user,
-                                        event__start_time__gt=datetime.now())
+                                     event__start_time__gt=datetime.now())
     if pts:
         names = u'，'.join([pt.event.name for pt in pts])
         ct = u'您已经报名参加了 %s' % names
@@ -373,4 +352,3 @@ def register_events(wxreq, user):
 register_cmd(events, u'活动', u'e,E,event')
 register_cmd(user_info, u'我', u'i,I,me')
 register_cmd(register_events, u'我的报名', 'r,mr')
-
