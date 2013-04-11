@@ -65,7 +65,7 @@ INVITE_MSG = """{{user.first_name}}您好：
     活动名称：{{event.name}}
     举办时间：{{event.start_time}} 至 {{event.end_time}}
     举办地址：{{event.address}}
-    活动费用：{{event.fee}}元/人
+    活动费用：{{event.fee}}元/人, 主要用于缴纳场地租用及当天茶点费用。
 
 请点击下面的链接确认前往参加活动，或向珠三角技术沙龙微信公众号发送rc命令进行报名的确认。感谢您的配合。
 点击这里确认报名：http://2.techparty.sinaapp.com/reg_confirm/{{event.id}}/{{participate.confirm_key}}/?m={{user.email}}&i={{user.username}}
