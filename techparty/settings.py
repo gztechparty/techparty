@@ -163,6 +163,5 @@ EMAIL_BACKEND = 'techparty.email.SAEEmailBackend'
 
 try:
     from xsettings import *
-    pass
 except:
     pass

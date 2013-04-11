@@ -17,6 +17,8 @@ class Event(models.Model):
                                         (1, u'深圳'), (2, u'珠海')))
     url = models.URLField(blank=True, null=True)
     image = models.URLField(blank=True, null=True)
+    address = models.CharField(max_length=100, blank=True, null=True)
+    fee = models.IntegerField(default=0)
 
     def __unicode__(self):
         return self.name
@@ -40,13 +42,17 @@ class Event(models.Model):
 class Participate(models.Model):
     user = models.ForeignKey(User)
     event = models.ForeignKey(Event)
-    status = models.IntegerField(choices=((0, u'已报名'), (1, u'已确认'),
-                                          (2, u'已付费'), (3, u'已签到')),
+    status = models.IntegerField(choices=((0, u'已报名'), (1, u'已邀请'),
+                                          (2, u'已拒绝'), (3, u'已确认'),
+                                          (4, u'已签到')),
                                  default=0)
     signup_time = models.DateTimeField(auto_now_add=True)
-    confirm_time = models.DateTimeField(blank=True, null=True)
-    pay_time = models.DateTimeField(blank=True, null=True)
-    checkin_time = models.DateTimeField(blank=True, null=True)
+    confirm_time = models.DateTimeField(blank=True, null=True, editable=False)
+    pay_time = models.DateTimeField(blank=True, null=True, editable=False)
+    checkin_time = models.DateTimeField(blank=True, null=True, editable=False)
+    paid = models.BooleanField(default=False, editable=False)
+    confirm_key = models.CharField(max_length=50, blank=True, null=True,
+                                  editable=False)
 
     def __unicode__(self):
         return u'%s@%s' % (self.user.first_name, self.event.name)
