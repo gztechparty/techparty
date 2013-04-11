@@ -2,6 +2,7 @@
 
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import datetime
 import time
 
 
@@ -22,6 +23,12 @@ class Event(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def can_confirm(self):
+        print type(self.start_time)
+        print self.start_time
+        print datetime.now()
+        return self.start_time > datetime.now()
 
     def to_dict(self):
         ts = time.strftime('%Y年%m月%d日',
@@ -52,7 +59,7 @@ class Participate(models.Model):
     checkin_time = models.DateTimeField(blank=True, null=True, editable=False)
     paid = models.BooleanField(default=False, editable=False)
     confirm_key = models.CharField(max_length=50, blank=True, null=True,
-                                  editable=False)
+                                   editable=False)
 
     def __unicode__(self):
         return u'%s@%s' % (self.user.first_name, self.event.name)

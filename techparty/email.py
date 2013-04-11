@@ -7,7 +7,7 @@ from django.conf import settings
 
 class SAEEmailBackend(BaseEmailBackend):
 
-    def send_messages(email_messages):
+    def send_messages(self, email_messages):
         for email in email_messages:
             send_mail(email.to, email.subject, email.body,
                       (settings.EMAIL_HOST, settings.EMAIL_PORT,
