@@ -30,6 +30,17 @@ def log_err():
 class TechpartyView(View, WxApplication):
 
     SECRET_TOKEN = settings.TECHPARTY_OFFICIAL_TOKEN
+    WELCOME_TXT = u"""感谢关注珠三角技术沙龙！本号的职能：
+- 线下沙龙活动推送通知
+- 支持沙龙报名、签到、直播
+- 收看沙龙图文总结
+- 收听沙龙录音
+- 倾听程序猿/嫒的声音
+- 帮工程师找工作
+- 为工作推荐工程师
+功能正在完善中，欢迎反馈。
+更多请惯性地输入help继续吧 :)
+    """
 
     def get(self, request):
         if '__text__' in request.GET and '__code__' in request.GET:
@@ -103,13 +114,13 @@ class TechpartyView(View, WxApplication):
         if self.wxstate:
             return self.resume()
         else:
-            command = self.get_actions().get(text.Content)
+            command = self.get_actions().get(text.Content.strip().lower())
             if not command:
                 # 尝试一下模糊匹配
                 blurs = [(k, v) for k, v in self.get_actions().iteritems()
                          if isinstance(v, Command) and not v.precise]
                 for blur in blurs:
-                    if blur[0] in text.Content:
+                    if blur[0] in text.Content.strip().lower():
                         command = blur[1]
                         break
                 if not command:
@@ -160,8 +171,8 @@ class TechpartyView(View, WxApplication):
                 social.save()
             except:
                 log_err()
-        try:
-            self.wxstate = UserState.objects.get(user=social.user.username)
-        except:
-            log_err()
+        ss = UserState.objects.filter(user=social.user.username)
+        if ss:
+            self.wxstate = ss[0]
+        else:
             self.wxstate = None

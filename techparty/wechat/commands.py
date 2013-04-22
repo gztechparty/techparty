@@ -116,7 +116,7 @@ class RegisterEvent(ICommand):
     - 等待用户选择活动或确认。
     """
     COMMAND_NAME = u'报名'
-    COMMAND_ALIAS = u'er,reg,ER,Reg,報名'
+    COMMAND_ALIAS = u'er,報名'
 
     TRANSIT_MAP = {
         'start': (('confirm', {}), ('choose', {}), ('end', {})),
@@ -149,7 +149,7 @@ class RegisterEvent(ICommand):
             self.state.context.get('has_info', False)
 
     def enter_choose_state(self):
-        ct = u'目前有两个活动正接受报名，请输入活动序号完成报名,输入c退出:'
+        ct = u'目前有多个活动正接受报名，请输入活动序号完成报名,输入c退出:'
         index = 0
         for e in self.state.context['events']:
             ct += u'序号：%d，活动：%s，举办时间：%s' %\
@@ -202,12 +202,98 @@ class RegisterEvent(ICommand):
         return WxTextResponse(u'您已取消报名,感谢关注', self.wxreq)
 
 
+class RegisterConfirm(ICommand):
+    COMMAND_NAME = u'确认报名'
+    COMMAND_ALIAS = u'rc'
+
+    TRANSIT_MAP = {
+        'start': (('confirm', {}), ('choose', {}), ('end', {})),
+        'confirm': (('end', {'Content': '1'}), ('cancel', {'Content': '0'})),
+        'choose': (('end', {}), ('cancel', {'Content': 'c'})),
+    }
+
+    def pt2dict(self, pt):
+        return {
+            'id': pt.id,
+            'event': pt.event.name
+        }
+
+    def start(self):
+        pts = Participate.objects.filter(user=self.user, status=1,
+                                         event__start_time__gt=datetime.now())
+        self.state.context['pts'] = [self.pt2dict(pt) for pt in pts]
+
+    def should_enter_confirm_state(self):
+        """如果只有一个活动就直接确认了。
+        """
+        return len(self.state.context.get('pts', [])) == 1
+
+    def enter_confirm_state(self):
+        """让用户确认报名还是取消报名
+        """
+        print 'enter confirm state'
+        pt = self.state.context['pts'][0]
+        event = Event.objects.get(id=pt['id'])
+        ct = u"""您确认出席“%s”活动吗？
+地址：%s
+时间：%s
+场地人均消费：%d元
+出席请回复1，取消请回复0:""" % (event.name, event.address,
+                            event.start_time, event.fee)
+        return WxTextResponse(ct, self.wxreq)
+
+    def should_enter_choose_state(self):
+        return len(self.state.context.get('pts', [])) > 1
+
+    def enter_choose_state(self):
+        print 'enter choose state'
+        ct = u'目前有多个活动需要确认，请输入序号，回复c退出:'
+        index = 0
+        for pt in self.state.context['pts']:
+            ct += u'序号: %d, 活动：%s' % (index, pt['event'])
+            index += 1
+        return WxTextResponse(ct, self.wxreq)
+
+    def should_enter_end_state(self):
+        print 'should enter end state?'
+        if self.state.state == 'start':
+            return not self.state.context.get('pts', [])
+        elif self.state.state == 'choose':
+            if self.wxreq.MsgType == 'text':
+                try:
+                    return int(self.wxreq.Context) in \
+                        range(len(self.state.ontext['pts']))
+                except:
+                    return False
+            else:
+                self.state.context['error'] = u'请输入文字'
+
+    def end(self):
+        print ''
+        if self.state.state == 'start':
+            return WxTextResponse(u'未找到需要确认的活动', self.wxreq)
+        else:
+            index = int(self.wxreq.Content) if \
+                self.state.state == 'choose' else 0
+            pt = self.state.context['pts'][index]
+            name = pt['event']
+            pt = Participate.objects.get(id=pt['id'])
+            pt.status = 3
+            pt.save()
+
+            ct = u'您已确认参加"%s"，届时请准时出席。' % name
+            return WxTextResponse(ct, self.wxreq)
+
+    def cancel(self):
+        return WxTextResponse(u'已取消确认。', self.wxreq)
+
+
 class ProfileEdit(ICommand):
     """修改用户的个人资料。
     用户昵称及Email是必填项。
     """
     COMMAND_NAME = u'修改资料'
-    COMMAND_ALIAS = u'ei,EI,Ei,eI,edit'
+    COMMAND_ALIAS = u'ei,edit'
 
     TRANSIT_MAP = {
         'start': (('edit', {}),),
@@ -215,8 +301,7 @@ class ProfileEdit(ICommand):
     }
 
     PROFILE_FIELDS = (('name', u'姓名', {'max_length': 10}),
-                      ('email', u'邮箱', 'email'),
-                      ('site', u'个人主页', 'url'))
+                      ('email', u'邮箱', 'email'),)
 
     def validate_value_for_field(self, value, rule):
         if isinstance(rule, dict):
@@ -310,6 +395,7 @@ class ProfileEdit(ICommand):
 
 
 register_cmd(RegisterEvent)
+register_cmd(RegisterConfirm)
 register_cmd(ProfileEdit)
 
 
@@ -344,13 +430,14 @@ def register_events(wxreq, user):
     pts = Participate.objects.filter(user=user,
                                      event__start_time__gt=datetime.now())
     if pts:
-        names = u'，'.join([pt.event.name for pt in pts])
+        names = u'，'.join([u"%s(%s)" % (pt.event.name,
+                                        pt.get_status())for pt in pts])
         ct = u'您已经报名参加了 %s' % names
     else:
         ct = u'您目前未报名任何活动'
     return WxTextResponse(ct, wxreq)
 
 
-register_cmd(events, u'活动', u'e,E,event')
-register_cmd(user_info, u'我', u'i,I,me')
+register_cmd(events, u'活动', u'e,event')
+register_cmd(user_info, u'我', u'i,me')
 register_cmd(register_events, u'我的报名', 'r,mr')

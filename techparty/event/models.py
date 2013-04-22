@@ -47,11 +47,12 @@ class Event(models.Model):
 
 
 class Participate(models.Model):
+    PT_STATUS = ((0, u'已报名'), (1, u'已邀请'),
+                 (2, u'已拒绝'), (3, u'已确认'),
+                 (4, u'已签到'))
     user = models.ForeignKey(User)
     event = models.ForeignKey(Event)
-    status = models.IntegerField(choices=((0, u'已报名'), (1, u'已邀请'),
-                                          (2, u'已拒绝'), (3, u'已确认'),
-                                          (4, u'已签到')),
+    status = models.IntegerField(choices=PT_STATUS,
                                  default=0)
     signup_time = models.DateTimeField(auto_now_add=True)
     confirm_time = models.DateTimeField(blank=True, null=True, editable=False)
@@ -63,6 +64,12 @@ class Participate(models.Model):
 
     def __unicode__(self):
         return u'%s@%s' % (self.user.first_name, self.event.name)
+
+    def get_status(self):
+        return self.PT_STATUS[self.status][1]
+
+    def username(self):
+        return self.user.first_name
 
     class Meta:
         verbose_name = u'参会纪录'
