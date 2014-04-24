@@ -12,10 +12,13 @@ from techparty.wechat.models import UserState
 from techparty.wechat.commands import interactive_cmds
 from techparty.wechat.commands import ICommand
 import random
-import pylibmc
+if settings.RUN_ON_SAE:
+    import pylibmc
+    cache = pylibmc.Client()
+else:
+    from django.core.cache import cache
 import inspect
 import traceback
-cache = pylibmc.Client()
 
 
 def log_err():

@@ -215,7 +215,8 @@ class RegisterConfirm(ICommand):
     def pt2dict(self, pt):
         return {
             'id': pt.id,
-            'event': pt.event.name
+            'event': pt.event.name,
+            'eid': pt.event.id
         }
 
     def start(self):
@@ -233,7 +234,7 @@ class RegisterConfirm(ICommand):
         """
         print 'enter confirm state'
         pt = self.state.context['pts'][0]
-        event = Event.objects.get(id=pt['id'])
+        event = Event.objects.get(id=pt['eid'])
         ct = u"""您确认出席“%s”活动吗？
 地址：%s
 时间：%s
@@ -430,9 +431,17 @@ def register_events(wxreq, user):
     pts = Participate.objects.filter(user=user,
                                      event__start_time__gt=datetime.now())
     if pts:
-        names = u'，'.join([u"%s(%s)" % (pt.event.name,
-                                        pt.get_status())for pt in pts])
-        ct = u'您已经报名参加了 %s' % names
+        ct = u''
+        for pt in pts:
+            if pt.status not in (1, 3):
+                names = u"%s(%s)" % (pt.event.name,
+                                                pt.get_status())
+                ct = ct + u'您已经报名参加了 %s\n' % names
+            else:
+                ct = ct + u'%s,您己受邀请参加下面的活动，届时请准时出席！\n' % user.first_name
+                event = pt.event
+                ct = ct + u"""活动:%s\n地址：%s\n时间：%s\n场地人均消费：%d元\n""" % (event.name, event.address,
+                                        event.start_time, event.fee)
     else:
         ct = u'您目前未报名任何活动'
     return WxTextResponse(ct, wxreq)

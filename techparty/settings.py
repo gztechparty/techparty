@@ -1,11 +1,9 @@
-# Django settings for techparty project.
+#encoding=utf-8
 
-from sae.const import (MYSQL_HOST, MYSQL_HOST_S,
-    MYSQL_PORT, MYSQL_USER, MYSQL_PASS, MYSQL_DB
-)
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+RUN_ON_SAE = False
 
 ADMINS = (
     ('jeff kit', 'jeff@techparty.org'),
@@ -15,17 +13,11 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': MYSQL_DB,                      # Or path to database file if using sqlite3.
-        'USER': MYSQL_USER,                      # Not used with sqlite3.
-        'PASSWORD': MYSQL_PASS,                  # Not used with sqlite3.
-        'HOST': MYSQL_HOST,                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': MYSQL_PORT,                      # Set to empty string for default. Not used with sqlite3.
-    },
-    'OPTIONS': {
-            'init_command': 'SET storage_engine=INNODB',
-    },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'techparty.db',
+        }
 }
+
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -158,10 +150,12 @@ LOGGING = {
     }
 }
 
+DEBUG_SECRET = 'helloworld'
 TECHPARTY_OFFICIAL_TOKEN = ''
-EMAIL_BACKEND = 'techparty.email.SAEEmailBackend'
 
 try:
     from xsettings import *
+    if RUN_ON_SAE:
+        from sae_settings import *
 except:
     pass

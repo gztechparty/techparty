@@ -6,5 +6,6 @@ media
 .DS_Store
 *.wsgic
 xsettings.py
+sae_settings.py
 .ropeproject
 site-packages

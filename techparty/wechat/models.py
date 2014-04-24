@@ -1,13 +1,17 @@
 #encoding=utf-8
 from django.db import models
 from django.db.models.signals import post_save, post_delete
+from django.conf import settings
 from wechat.official import WxTextResponse
 from wechat.official import WxMusicResponse
 from wechat.official import WxNewsResponse
 from wechat.official import WxMusic, WxArticle
 from jsonfield import JSONField
-import pylibmc
-cache = pylibmc.Client()
+if settings.RUN_ON_SAE:
+    import pylibmc
+    cache = pylibmc.Client()
+else:
+    from django.core.cache import cache
 
 
 class Command(models.Model):
