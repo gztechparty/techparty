@@ -1,25 +1,33 @@
 #encoding=utf-8
 
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from datetime import datetime
 import time
+from tagging.fields import TagField
 
 
 class Event(models.Model):
-    name = models.CharField(max_length=50)
-    description = models.TextField()
-    slug = models.SlugField(blank=True, null=True)
-    hashtag = models.CharField(max_length=20, blank=True, null=True)
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
-    sponsor = models.ForeignKey(User, blank=True, null=True)
-    area = models.IntegerField(choices=((0, u'广州'),
-                                        (1, u'深圳'), (2, u'珠海')))
-    url = models.URLField(blank=True, null=True)
-    image = models.URLField(blank=True, null=True)
-    address = models.CharField(max_length=100, blank=True, null=True)
-    fee = models.IntegerField(default=0)
+    name = models.CharField(u'活动名称', max_length=50)
+    description = models.TextField(u'活动内容')
+    slug = models.SlugField(u'slug', blank=True, null=True)
+    hashtag = models.CharField(u'社交标签', max_length=20,
+                               blank=True, null=True)
+    tags = TagField(u'标签')
+    start_time = models.DateTimeField(u'开始时间')
+    end_time = models.DateTimeField(u'结束时间')
+    sponsor = models.ForeignKey(u'发起人', settings.AUTH_USER_MODEL,
+                                blank=True, null=True)
+    area = models.IntegerField(u'城市', choices=((0, u'广州'),
+                                                 (1, u'深圳'), (2, u'珠海')))
+
+    # 微信公众号用
+    url = models.URLField(u'活动网址', blank=True, null=True)
+    image = models.URLField(u'海报', blank=True, null=True)
+    address = models.CharField(u'会场', max_length=200, blank=True, null=True)
+    fee = models.IntegerField(u'费用', default=0)
+
+    create_time = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
         return self.name
@@ -50,15 +58,16 @@ class Participate(models.Model):
     PT_STATUS = ((0, u'已报名'), (1, u'已邀请'),
                  (2, u'已拒绝'), (3, u'已确认'),
                  (4, u'已签到'))
-    user = models.ForeignKey(User)
-    event = models.ForeignKey(Event)
-    status = models.IntegerField(choices=PT_STATUS,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=u'用户')
+    event = models.ForeignKey(Event, verbose_name=u'活动')
+    status = models.IntegerField(u'状态', choices=PT_STATUS,
                                  default=0)
-    signup_time = models.DateTimeField(auto_now_add=True)
+    signup_time = models.DateTimeField(u'报名时间', auto_now_add=True)
     confirm_time = models.DateTimeField(blank=True, null=True, editable=False)
     pay_time = models.DateTimeField(blank=True, null=True, editable=False)
     checkin_time = models.DateTimeField(blank=True, null=True, editable=False)
     paid = models.BooleanField(default=False, editable=False)
+    pay_amount = models.IntegerField(u'费用')
     confirm_key = models.CharField(max_length=50, blank=True, null=True,
                                    editable=False)
 
@@ -77,16 +86,21 @@ class Participate(models.Model):
         unique_together = ('user', 'event')
 
 
-class Tweet(models.Model):
-    user = models.ForeignKey(User)
-    event = models.ForeignKey(Event)
-    text = models.CharField(max_length=280, blank=True, null=True)
-    image = models.URLField(blank=True, null=True)
-    add_time = models.DateTimeField(auto_now_add=True)
+class Topic(models.Model):
+    event = models.ForeignKey(Event, verbose_name=u'活动')
+    title = models.CharField(u'标题', max_length=100)
+    sub_title = models.CharField(u'副标题', max_length=100)
+    tags = TagField(u'标签')
+
+    description = models.TextField(u'简介')
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=u'讲师')
+    
+    slide_file = models.URLField(u'幻灯文件', blank=True, null=True)
+    slide_url = models.URLField(u'在线幻灯', blank=True, null=True)
 
     def __unicode__(self):
-        return self.text or self.image
+        return self.title
 
     class Meta:
-        verbose_name = u'直播推文'
-        verbose_name_plural = u'直播推文'
+        verbose_name = u'主题'
+        verbose_name_plural = u'主题'

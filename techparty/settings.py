@@ -18,6 +18,9 @@ DATABASES = {
         }
 }
 
+ALLOWED_HOSTS = ['2.techparty.sinaapp.com', 'techparty.sinaapp.com',
+                 'techparty.org']
+
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -115,11 +118,16 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'django.contrib.comments',
+    'social.apps.django_app.default',
+    'techparty.member',
     'techparty.event',
     'techparty.wechat',
     'techparty.website',
-    'social_auth',
+    'tagging',
 )
+
+AUTH_USER_MODEL = 'techparty.member.User'
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
