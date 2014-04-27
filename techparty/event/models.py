@@ -16,7 +16,8 @@ class Event(models.Model):
     tags = TagField(u'标签')
     start_time = models.DateTimeField(u'开始时间')
     end_time = models.DateTimeField(u'结束时间')
-    sponsor = models.ForeignKey(u'发起人', settings.AUTH_USER_MODEL,
+    sponsor = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                verbose_name=u'发起人',
                                 blank=True, null=True)
     area = models.IntegerField(u'城市', choices=((0, u'广州'),
                                                  (1, u'深圳'), (2, u'珠海')))
@@ -63,6 +64,7 @@ class Participate(models.Model):
     status = models.IntegerField(u'状态', choices=PT_STATUS,
                                  default=0)
     signup_time = models.DateTimeField(u'报名时间', auto_now_add=True)
+    reason = models.TextField(u'理由', blank=True, null=True)
     confirm_time = models.DateTimeField(blank=True, null=True, editable=False)
     pay_time = models.DateTimeField(blank=True, null=True, editable=False)
     checkin_time = models.DateTimeField(blank=True, null=True, editable=False)

@@ -1,0 +1,5 @@
+django==1.6
+wechat
+jsonfield
+django-tagging
+python-social-auth

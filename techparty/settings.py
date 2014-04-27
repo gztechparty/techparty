@@ -125,9 +125,10 @@ INSTALLED_APPS = (
     'techparty.wechat',
     'techparty.website',
     'tagging',
+    'south',
 )
 
-AUTH_USER_MODEL = 'techparty.member.User'
+AUTH_USER_MODEL = 'member.User'
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

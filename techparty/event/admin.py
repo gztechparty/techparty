@@ -49,7 +49,7 @@ class ParticipateAdmin(admin.ModelAdmin):
     markas_checkin.short_description = u'标记为已签到'
     markas_paid.short_description = u'标记为已收费'
 
-    list_display = ('username', 'event',
+    list_display = ('username', 'event', 'reason',
                     'signup_time', 'status', 'paid')
     list_filter = ('event', 'status')
     actions = [invite_user, reject_user, markas_checkin, markas_paid]
