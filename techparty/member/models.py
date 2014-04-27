@@ -49,6 +49,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     is_lecturer = models.BooleanField(u'讲师', default=False)
 
+    birth_date = models.DateTimeField(null=True, blank=True)
+    gendar = models.IntegerField(default=1,
+                                 choices=((0, u'女'), (1, u'男')))
+    company = models.CharField(u'公司', max_length=100, blank=True, null=True)
+    title = models.CharField(u'职位', max_length=50, blank=True, null=True)
+
     is_staff = models.BooleanField(u'是否组委', default=False,
                                    help_text='flag for log into admin site.')
     is_active = models.BooleanField(u'是否可用', default=True)
