@@ -3,3 +3,4 @@ wechat
 jsonfield
 django-tagging
 python-social-auth
+south
