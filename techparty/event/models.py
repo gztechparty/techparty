@@ -19,8 +19,9 @@ class Event(models.Model):
     sponsor = models.ForeignKey(settings.AUTH_USER_MODEL,
                                 verbose_name=u'发起人',
                                 blank=True, null=True)
-    area = models.IntegerField(u'城市', choices=((0, u'广州'),
-                                                 (1, u'深圳'), (2, u'珠海')))
+    area = models.IntegerField(u'城市',
+                               choices=((0, u'广州'),
+                                        (1, u'深圳'), (2, u'珠海')))
 
     # 微信公众号用
     url = models.URLField(u'活动网址', blank=True, null=True)
@@ -96,7 +97,7 @@ class Topic(models.Model):
 
     description = models.TextField(u'简介')
     author = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=u'讲师')
-    
+
     slide_file = models.URLField(u'幻灯文件', blank=True, null=True)
     slide_url = models.URLField(u'在线幻灯', blank=True, null=True)
 
@@ -106,3 +107,26 @@ class Topic(models.Model):
     class Meta:
         verbose_name = u'主题'
         verbose_name_plural = u'主题'
+
+
+class Photo(models.Model):
+    event = models.ForeignKey(Event, verbose_name=u'活动')
+    name = models.CharField(u'图片名', max_length=100)
+    description = models.CharField(u'描述', max_length=140,
+                                   blank=True, null=True)
+    uploader = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                 verbose_name=u'上传者')
+    url = models.URLField(u'地址')
+    source = models.IntegerField(u'来源', default=0,
+                                 choices=((0, u'后台上传'),
+                                          (1, u'直播'),
+                                          (2, u'用户上传')))
+    is_valid = models.BooleanField(default=1)
+    create_time = models.DateTimeField(auto_now_add=True, null=True)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = u'照片'
+        verbose_name_plural = u'照片'

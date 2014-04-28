@@ -5,8 +5,13 @@ from django.core.mail import send_mail
 from django.template import Template, Context
 from techparty.event.models import Event
 from techparty.event.models import Participate
+from techparty.event.models import Photo
 from datetime import datetime
 from uuid import uuid4
+
+
+class PhotoAdmin(admin.ModelAdmin):
+    pass
 
 
 class EventAdmin(admin.ModelAdmin):
@@ -21,7 +26,7 @@ class ParticipateAdmin(admin.ModelAdmin):
     def invite_user(modeladmin, request, queryset):
         qs = queryset.filter(status__in=(0, 2))
         for pt in qs:
-            pt.confirm_key = uuid4().get_hex()            
+            pt.confirm_key = uuid4().get_hex()
             send_mail(u'珠三角技术沙龙活动邀请', invite_msg(pt),
                       'techparty.org@gmail.com',
                       [pt.user.email], fail_silently=False)
@@ -57,6 +62,7 @@ class ParticipateAdmin(admin.ModelAdmin):
 
 admin.site.register(Event, EventAdmin)
 admin.site.register(Participate, ParticipateAdmin)
+admin.site.register(Photo, PhotoAdmin)
 
 
 INVITE_MSG = """{{user.first_name}}您好：
