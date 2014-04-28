@@ -6,7 +6,7 @@ from django.views.generic.base import View
 from django.conf import settings
 from wechat.official import WxApplication
 from wechat.official import WxTextResponse
-from social_auth.models import UserSocialAuth
+from social.apps.django_app.default.models import UserSocialAuth
 from techparty.wechat.models import Command
 from techparty.wechat.models import UserState
 from techparty.wechat.commands import interactive_cmds
