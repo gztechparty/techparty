@@ -121,6 +121,7 @@ INSTALLED_APPS = (
     'django.contrib.comments',
     'social.apps.django_app.default',
     'techparty.member',
+    'techparty.lecturer',
     'techparty.event',
     'techparty.wechat',
     'techparty.website',
