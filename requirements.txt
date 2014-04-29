@@ -4,3 +4,5 @@ jsonfield
 django-tagging
 python-social-auth
 south
+simplejson
+django-favorites
