@@ -125,6 +125,7 @@ INSTALLED_APPS = (
     'techparty.wechat',
     'techparty.website',
     'tagging',
+    'favorites',
     'south',
 )
 
