@@ -8,7 +8,8 @@
 
 - 操作系统随意
 - python2.6以上
-- virtualEnv看开发者习惯，建议使用。
+- virtualenvwrapper看开发者习惯，建议使用。也可以配合[virtualenvwrapper](http://virtualenvwrapper.readthedocs.org/en/latest/)
+
 
 代码风格要求：
 
@@ -40,6 +41,7 @@
 `python manage.py syncdb`
 
 
+如果syncdb没有新建管理员帐号，也可以手动运行以下命令：    
 新建管理员用户
 
 `python manage.py createsuperuser`
