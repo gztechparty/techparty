@@ -16,10 +16,11 @@ def lecturer_list_view(request):
         print lecture.name
         lecture_dict["name"] = lecture.name
         if lecture.avatar==None:
-            print "lecture.avatar =", lecture.avatar, "lecture_dict['img_url'] = "
-            lecture_dict["img_url"] = ""
+            print "lecture.avatar =", lecture.avatar
+            lecture_dict["img_url"] = "http://www.w3school.com.cn/i/w3school_logo_white.gif"
         else:
-            lecture_dict["img_url"] = lecture.avatar.url
+            lecture_dict["img_url"] = lecture.avatar
+            print "lecture.avatar =", lecture.avatar
         lecture_dict["stars"] = 0
         lectures_list.append(lecture_dict)
 

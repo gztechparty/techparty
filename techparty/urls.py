@@ -11,4 +11,5 @@ urlpatterns = \
              url(r'^reg_confirm/(?P<eid>\d+)/(?P<key>\w+)/$', 'techparty.website.views.confirm_event'),
              url(r'^lecturer/', include('techparty.lecturer.urls', namespace="lecturer")),
              url(r'^member/', include('techparty.member.urls', namespace="member")),
+             url(r'^comments/', include('django.contrib.comments.urls')),
              )

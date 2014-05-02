@@ -8,14 +8,15 @@
         {% for lecture_dict in tmp_list_list %}
         <div class="col-sm-6 col-md-4">
             <div class="thumbnail">
-                <a href="/member/{{lecture_dict.name}}/"><img src="http://www.w3school.com.cn/i/w3school_logo_white.gif" alt="..." height="200" width="200"></a>
+                <!-- <a href="/member/{{lecture_dict.name}}/"><img src="{{lecture_dict.img_url}}" alt="..." height="200" width="200"></a> -->
+                <a href="{% url 'member:member_info_detail' lecture_dict.name %}"><img src="{{lecture_dict.img_url}}" alt="..." height="200" width="200"></a>
                 <!-- <img src="http://www.w3school.com.cn/i/w3school_logo_white.gif" alt="..." height="200" width="200"> -->
                 <div class="caption">
                     <p>{{lecture_dict.name}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;{{lecture_dict.stars}} star(s)&nbsp;)<p>
                     <p>
                         <a href="#" title="收藏"><i class="fa fa-star fa-2x"></i></a> 
                         <a href="#" title="私信"><i class="fa fa-envelope-o fa-2x"></i></a> 
-                        <a href="#" title="留言"><i class="fa fa-comment-o fa-2x"></i></a>
+                        <a href="/member/{{lecture_dict.name}}/#addcomments" title="评论"><i class="fa fa-comment-o fa-2x"></i></a>
                     </p>
                 </div>
             </div>

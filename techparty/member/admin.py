@@ -49,14 +49,14 @@ class UserChangeForm(forms.ModelForm):
 
 class UserLinkInline(admin.StackedInline):
     model = UserLink
-    extra = 3
+    extra = 1
 
 
 class MyUserAdmin(UserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
 
-    list_display = ('name', 'nickname',  'is_superuser', 'is_lecturer')
+    list_display = ('id','name', 'nickname',  'is_superuser', 'is_lecturer')
     list_filter = ('is_superuser',)
     fieldsets = (
         (None, {'fields': ('name', )}),
@@ -66,7 +66,8 @@ class MyUserAdmin(UserAdmin):
                                 'description',
                                 'company',
                                 'title',
-                                'tags'
+                                'tags',
+                                'avatar',
                                 )}),
         (u'用户权限', {
             'fields': ('is_superuser',
