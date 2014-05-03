@@ -6,42 +6,8 @@ from tagging.models import Tag
 
 # Create your views here.
 
-
-def member_info_detail2(request, member_name):
-    member = User.objects.filter(name=member_name).prefetch_related('userlink_set')
-    member = member[0]
-    member_dict = {}
-    member_dict['name'] = member.name
-    member_dict['email'] = member.email
-    member_dict['stars'] = 0
-    company_str = ''
-    if member.company!=None:
-        company_str = member.company
-    if member.title!=None:
-        company_str = company_str + ' ' + member.title
-    member_dict['company'] = company_str
-
-    description_str = ''
-    if member.description!=None:
-        description_str = member.description
-    member_dict['description'] = description_str
-
-    tags = ''
-    if member.tags!=None:
-        tags = member.tags
-        print "tags type = ", type(member.tags), '\n', member.tags, '\n', 'id =', member.id
-    member_dict['tags'] = tags
-
-    user_link_list = []
-    for user_link in member.userlink_set.all():
-        user_link_list.append({'title':user_link.title, 'url':user_link.url})
-        print user_link.url, user_link.title
-    member_dict['user_link_list'] = user_link_list
-
-    return render(request, 'member_info_detail.html', member_dict)
-
 def member_info_detail(request, member_name):
-    member = User.objects.filter(name=member_name).prefetch_related('userlink_set')
+    member = User.objects.filter(name=member_name).prefetch_related('userlink_set').prefetch_related('topic_set')
     member = member[0]
    
     if member.avatar==None:
@@ -63,7 +29,6 @@ def member_info_detail(request, member_name):
     tags_list = []
     if member.tags!=None:
         tags = member.tags
-        # print "tags type = ", type(member.tags), '\n', member.tags, '\n', 'id =', member.id
         ttags = member.get_tags()
         for item in ttags:
             tags_list.append(item)
@@ -72,8 +37,49 @@ def member_info_detail(request, member_name):
     user_link_list = []
     for user_link in member.userlink_set.all():
         user_link_list.append({'title':user_link.title, 'url':user_link.url})
-        print user_link.url, user_link.title
     member.user_link_list = user_link_list
 
+    (topic, topic_more_visual, topic_have) = get_topic(member)
+    member.topic = topic
+    member.topic_more_visual = topic_more_visual
+    member.topic_have = topic_have
+
     return render(request, 'member_info_detail.html', {'member':member})
+
+
+MemberTopicDefaultSize = 3
+def get_topic(member):
+    topic_count = member.topic_set.all().order_by('title').count()
+    topic_more_visual = False
+    topic_have = False
+    if topic_count > MemberTopicDefaultSize:
+        topic_more_visual = True
+    if topic_count > 0:
+        topic_have = True
+    topic = member.topic_set.all().order_by('title')
+    topic = topic[0:3]
+    return (topic, topic_more_visual, topic_have)
+
+def member_topic_list(request, member_name):
+    member = User.objects.filter(name=member_name).prefetch_related('userlink_set').prefetch_related('topic_set')
+    member = member[0]
+    topic_list = member.topic_set.all().order_by('title')
+    count = 0
+    tmp_list = []
+    tmp_list_list = []
+    for topic in topic_list:
+        tmp_list_list.append(topic)
+        count = count + 1
+        print count
+        if count%3==0:
+            count = 0
+            tmp_list.append(tmp_list_list)
+            tmp_list_list = []
+
+    if tmp_list_list:
+        tmp_list.append(tmp_list_list)
+    member.topic_list = tmp_list
+
+    return render(request, 'member_topic_list.html', {'member':member})
+
 

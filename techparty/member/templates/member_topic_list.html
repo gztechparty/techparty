@@ -1,0 +1,28 @@
+
+{% extends "base.html" %}
+
+{% block main %}
+<div class="container">
+    <h4>{{member.name}}的Topic</h4>
+    {% for tmp_list_list in member.topic_list %}
+    <div class="row">
+        {% for topic in tmp_list_list %}
+        <div class="col-md-4">
+            <h3><a href="#">{{topic.title}}</a></h3>
+            <div style="height:100px;overflow-y:hidden;">
+                <p>{{topic.description}} </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <hr>
+    {% endfor %}
+</div>
+
+
+{% endblock %}
+
+
+
+
+

@@ -5,16 +5,14 @@
 <div class="container">
     <div class="row">
         <div class="col-md-4">
-            <div class="thumbnail">
-                <img src="{{member.avatar}}" alt="..." height="200" width="200" >
-                <div class="caption">
-                    <p>{{member.name}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;{{member.stars}} star(s)&nbsp;)<p>
-                    <p>
-                        <a href="#" title="收藏"><i class="fa fa-star fa-2x"></i></a> 
-                        <a href="#" title="私信"><i class="fa fa-envelope-o fa-2x"></i></a> 
-                        <a href="#addcomments" title="留言"><i class="fa fa-comment-o fa-2x"></i></a>
-                    </p>
-                </div>
+            <img typeof="foaf:Image" src="{{member.avatar}}" width="200" height="200" alt="" />  
+            <div class="caption">
+                <p>{{member.name}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;{{member.stars}} star(s)&nbsp;)<p>
+                <p>
+                    <a href="#" title="收藏"><i class="fa fa-star fa-2x"></i></a> 
+                    <a href="#" title="私信"><i class="fa fa-envelope-o fa-2x"></i></a> 
+                    <a href="#addcomments" title="留言"><i class="fa fa-comment-o fa-2x"></i></a>
+                </p>
             </div>
         </div>
         <div class="col-md-8">
@@ -36,9 +34,24 @@
     </div>
 
     <hr>
+    {% if member.topic_have %}
     <h4>{{member.name}}的Topic</h4>
+      <div class="row">
+        {% for topic in member.topic %}
+        <div class="col-md-4">
+          <h3><a href="#">{{topic.title}}</a></h3>
+          <div style="height:100px;overflow-y:hidden;">
+          <p>{{topic.description}} </p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% if member.topic_more_visual %}
+      <br>
+      <p><a class="btn btn-default" href="{% url 'member:member_topic_list' member.name %}" role="button">更多topic &raquo;</a></p>
+      {% endif %}
     <hr>
-
+    {% endif %}
 
     <!-- 评论 -->
     <h4>给{{member.name}}捎句话</h4>
@@ -82,14 +95,10 @@
             <div class="col-md-9">
                 <div class="row">
                     <div class="col-md-2">
-                        <div class="thumbnail">
-                            <!-- <img src="{{comment.user.avatar}}" alt="..." height="80" width="80"> -->
-                            <img src="http://www.w3school.com.cn/i/w3school_logo_white.gif" alt="..." height="50" width="50">
-                            <p><b>{{comment.user.name}}</b></p>
-                        </div>
+                        <img typeof="foaf:Image" src="http://www.w3school.com.cn/i/w3school_logo_white.gif" width="50" height="50" alt="" /> 
+                        <p><b>{{comment.user.name}}</b></p>
                     </div>
                     <div class="col-md-10">
-                        <!-- <p>头像url {{comment.user.avatar}}</p> -->
                         <p>{{comment.comment}}</p>
                         <p>{{comment.submit_date|date:"Y年m月d日H:i"}}</p>
                         <br>
@@ -100,68 +109,13 @@
         {% endfor %}
     </div>
 
- 
-
-
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="row">
-                <div class="col-md-3">
-                    
-                    <a href="/course/1381"><img typeof="foaf:Image" src="http://ninghao.net/files/styles/cover/public/poster/websql-cd_0.jpg?itok=kX3u_5wO" width="240" height="231" alt="" /></a>    
-                    <h3 class="course-title"><a href="/course/1381">HTML5：Web SQL</a></h3>    
-                    <div class="course-meta">2014-04-09</div>
-
-                </div>
-
-                <div class="col-md-3">
-                    
-                    <a href="/course/1381"><img typeof="foaf:Image" src="http://ninghao.net/files/styles/cover/public/poster/websql-cd_0.jpg?itok=kX3u_5wO" width="240" height="231" alt="" /></a>    
-                    <h2 class="course-title"><a href="/course/1381">HTML5：Web SQL</a></h2>    
-                    <div class="course-meta">2014-04-09</div>
-
-                </div>
-
-                <div class="col-md-3">
-                    
-                    <a href="/course/1381"><img typeof="foaf:Image" src="http://ninghao.net/files/styles/cover/public/poster/websql-cd_0.jpg?itok=kX3u_5wO" width="240" height="231" alt="" /></a>    
-                    <h2 class="course-title"><a href="/course/1381">HTML5：Web SQL</a></h2>    
-                    <div class="course-meta">2014-04-09</div>
-
-                </div>
-
-                <div class="col-md-3">
-                    
-                    <a href="/course/1381"><img typeof="foaf:Image" src="http://ninghao.net/files/styles/cover/public/poster/websql-cd_0.jpg?itok=kX3u_5wO" width="240" height="231" alt="" /></a>    
-                    <h2 class="course-title"><a href="/course/1381">HTML5：Web SQL</a></h2>    
-                    <div class="course-meta">2014-04-09</div>
-
-                </div>
-            </div>
-        </div>
-
-    </div>
-    <ul class="pager">
-    <li class="previous first">&nbsp;</li>
-    <li class="pager-current">1 / 11</li>
-    <li class="next last"><a title="去下一个页面" href="/latest?page=1">下一页 ›</a></li>
-    </ul>
-</div>
-
-
-
-
-
-
-
-
-
-
-     
-
 
 </div>
+
+
+
+
+
 {% endblock %}
 
 

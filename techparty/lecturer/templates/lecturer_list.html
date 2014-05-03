@@ -6,24 +6,39 @@
 {% for tmp_list_list in lectures_list %}
     <div class="row">
         {% for lecture_dict in tmp_list_list %}
-        <div class="col-sm-6 col-md-4">
-            <div class="thumbnail">
-                <!-- <a href="/member/{{lecture_dict.name}}/"><img src="{{lecture_dict.img_url}}" alt="..." height="200" width="200"></a> -->
-                <a href="{% url 'member:member_info_detail' lecture_dict.name %}"><img src="{{lecture_dict.img_url}}" alt="..." height="200" width="200"></a>
-                <!-- <img src="http://www.w3school.com.cn/i/w3school_logo_white.gif" alt="..." height="200" width="200"> -->
-                <div class="caption">
-                    <p>{{lecture_dict.name}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;{{lecture_dict.stars}} star(s)&nbsp;)<p>
-                    <p>
-                        <a href="#" title="收藏"><i class="fa fa-star fa-2x"></i></a> 
-                        <a href="#" title="私信"><i class="fa fa-envelope-o fa-2x"></i></a> 
-                        <a href="/member/{{lecture_dict.name}}/#addcomments" title="评论"><i class="fa fa-comment-o fa-2x"></i></a>
-                    </p>
-                </div>
+        <div class="col-md-4">
+            <a href="{% url 'member:member_info_detail' lecture_dict.name %}"><img typeof="foaf:Image" src="{{lecture_dict.img_url}}" width="200" height="200" alt="" /></a>   
+            <div class="caption">
+                <p>{{lecture_dict.name}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;{{lecture_dict.stars}} star(s)&nbsp;)<p>
+                <p>
+                    <a href="#" title="收藏"><i class="fa fa-star fa-2x"></i></a> 
+                    <a href="#" title="私信"><i class="fa fa-envelope-o fa-2x"></i></a> 
+                    <a href="/member/{{lecture_dict.name}}/#addcomments" title="评论"><i class="fa fa-comment-o fa-2x"></i></a>
+                </p>
             </div>
         </div>
         {% endfor %}
     </div>
+    <hr>
 {% endfor %}
+
+<!-- 翻页 -->
+<div class="container">
+    <ul class="pager">
+        {% if pre_page.visible %}
+            <li class="previous first">
+                <a title="返回上一个页面" href="{% url 'lecturer:lecturer_list_view_page' pre_page.page %}">‹ 前一页</a>
+            </li>
+        {% else %}
+            <li class="previous first">&nbsp;</li>
+        {% endif %}
+        <li class="pager-current">{{page}} / {{total_page}}</li>
+        {% if next_page.visible %}
+            <li class="next last"><a title="去下一个页面" href="{% url 'lecturer:lecturer_list_view_page' next_page.page %}">下一页 ›</a></li>
+        {% else %}
+            <li class="next first">&nbsp;</li>
+        {% endif %}
+    </ul>
 </div>
 {% endblock %}
 
