@@ -7,9 +7,26 @@
         <div class="col-md-4">
             <img typeof="foaf:Image" src="{{member.avatar}}" width="200" height="200" alt="" />  
             <div class="caption">
-                <p>{{member.name}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;{{member.stars}} star(s)&nbsp;)<p>
+                <p id="collect_p_{{member.name}}">{{member.name}} ({{member.stars.stars}} star(s))<p>
                 <p>
-                    <a href="#" title="收藏"><i class="fa fa-star fa-2x"></i></a> 
+                    <a href="javascript:void(0)" title="{{member.stars.stars_title}}" id="collect_a_{{member.name}}"><i class="fa fa-star fa-2x" style="color:{{member.stars.stars_color}};" id="collect_{{member.name}}"></i></a>
+                    <!-- 收藏的响应 -->
+                    <script type="text/javascript">
+                    $(document).ready(function(){
+                        $("#collect_{{member.name}}").click(function(){
+                            {% if user.is_authenticated %} 
+                                $.getJSON("{% url 'member:member_collect' member.name %}", function(json){
+                                    $("#collect_{{member.name}}").css("color", json.stars_color);
+                                    $("#collect_a_{{member.name}}").attr("title", json.stars_title);
+                                    var new_text = "{{member.name}} (" + json.stars + " star(s))"
+                                    $("#collect_p_{{member.name}}").text(new_text);
+                                });
+                            {% else %}
+                                alert("请先登录");
+                            {% endif %}
+                        });
+                    });
+                    </script>
                     <a href="#" title="私信"><i class="fa fa-envelope-o fa-2x"></i></a> 
                     <a href="#addcomments" title="留言"><i class="fa fa-comment-o fa-2x"></i></a>
                 </p>
@@ -39,7 +56,7 @@
       <div class="row">
         {% for topic in member.topic %}
         <div class="col-md-4">
-          <h3><a href="#">{{topic.title}}</a></h3>
+          <h3><a href="">{{topic.title}}</a></h3>
           <div style="height:100px;overflow-y:hidden;">
           <p>{{topic.description}} </p>
           </div>
@@ -57,8 +74,6 @@
     <h4>给{{member.name}}捎句话</h4>
 
     {% load comments %}
-    <!-- {% get_comment_count for member as comment_count %}  -->
-    <!-- <p>This event has {{ comment_count }} comments.</p> -->
 
     <div class="container">
     <!-- 这里的user就是当前登录的用户 -->
@@ -95,7 +110,7 @@
             <div class="col-md-9">
                 <div class="row">
                     <div class="col-md-2">
-                        <img typeof="foaf:Image" src="http://www.w3school.com.cn/i/w3school_logo_white.gif" width="50" height="50" alt="" /> 
+                        <img typeof="foaf:Image" src="{{comment.user.avatar}}" width="50" height="50" alt="" /> 
                         <p><b>{{comment.user.name}}</b></p>
                     </div>
                     <div class="col-md-10">
