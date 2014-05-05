@@ -6,6 +6,7 @@ from django.template import Template, Context
 from techparty.event.models import Event
 from techparty.event.models import Participate
 from techparty.event.models import Photo
+from techparty.event.models import Topic
 from datetime import datetime
 from uuid import uuid4
 
@@ -14,9 +15,15 @@ class PhotoAdmin(admin.ModelAdmin):
     pass
 
 
+class TopicInline(admin.StackedInline):
+    model = Topic
+    extra = 2
+
+
 class EventAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'area', 'hashtag',
                     'start_time', 'end_time')
+    inlines = [TopicInline]
     search_fields = ('name', 'description', 'slug', 'hashtag')
     list_filter = ('start_time', 'area')
 

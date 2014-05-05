@@ -4,6 +4,7 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from jsonfield import JSONField
 from tagging.fields import TagField
+from tagging.models import Tag
 from uuid import uuid4
 
 
@@ -71,6 +72,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         return self.name
+
+    def get_tags(self):
+        return Tag.objects.get_for_object(self)
 
     def __unicode__(self):
         return self.nickname or str(self.pk)

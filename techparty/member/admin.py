@@ -4,7 +4,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
-from techparty.member.models import User
+from techparty.member.models import User, UserLink
 
 
 class UserCreationForm(forms.ModelForm):
@@ -47,16 +47,28 @@ class UserChangeForm(forms.ModelForm):
         return self.initial["password"]
 
 
+class UserLinkInline(admin.StackedInline):
+    model = UserLink
+    extra = 1
+
+
 class MyUserAdmin(UserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
 
-    list_display = ('name', 'nickname',  'is_superuser')
+    list_display = ('id','name', 'nickname',  'is_superuser', 'is_lecturer')
     list_filter = ('is_superuser',)
     fieldsets = (
         (None, {'fields': ('name', )}),
         (u'基本信息', {'fields': ('password',
-                                      'email')}),
+                                'email',
+                                'is_lecturer',
+                                'description',
+                                'company',
+                                'title',
+                                'tags',
+                                'avatar',
+                                )}),
         (u'用户权限', {
             'fields': ('is_superuser',
                        'is_staff',
@@ -64,6 +76,7 @@ class MyUserAdmin(UserAdmin):
             'classes': ('collapse',)
             }),
     )
+    inlines = [UserLinkInline]
     add_fieldsets = (
         (None, {
             'classes': ('wide',),

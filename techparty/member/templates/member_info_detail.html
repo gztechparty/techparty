@@ -1,0 +1,139 @@
+
+{% extends "base.html" %}
+
+{% block main %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <img typeof="foaf:Image" src="{{member.avatar}}" width="200" height="200" alt="" />  
+            <div class="caption">
+                <p id="collect_p_{{member.name}}">{{member.name}} ({{member.stars.stars}} star(s))<p>
+                <p>
+                    <a href="javascript:void(0)" title="{{member.stars.stars_title}}" id="collect_a_{{member.name}}"><i class="fa fa-star fa-2x" style="color:{{member.stars.stars_color}};" id="collect_{{member.name}}"></i></a>
+                    <!-- 收藏的响应 -->
+                    <script type="text/javascript">
+                    $(document).ready(function(){
+                        $("#collect_{{member.name}}").click(function(){
+                            {% if user.is_authenticated %} 
+                                $.getJSON("{% url 'member:member_collect' member.name %}", function(json){
+                                    $("#collect_{{member.name}}").css("color", json.stars_color);
+                                    $("#collect_a_{{member.name}}").attr("title", json.stars_title);
+                                    var new_text = "{{member.name}} (" + json.stars + " star(s))"
+                                    $("#collect_p_{{member.name}}").text(new_text);
+                                });
+                            {% else %}
+                                alert("请先登录");
+                            {% endif %}
+                        });
+                    });
+                    </script>
+                    <a href="#" title="私信"><i class="fa fa-envelope-o fa-2x"></i></a> 
+                    <a href="#addcomments" title="留言"><i class="fa fa-comment-o fa-2x"></i></a>
+                </p>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <p>公司: &nbsp;&nbsp;{{member.company}}</p>
+            <p>个人简介: &nbsp;&nbsp;{{member.description}}</p>
+            <p>个人标签: &nbsp;&nbsp;
+                {% for tags in member.tags_list%}
+                    {{tags}}&nbsp;&nbsp;
+                {% endfor %}
+            </p>
+            <p>链接: 
+                &nbsp;&nbsp;
+                {% for user_link in member.user_link_list %}
+                    <a href="{{user_link.url}}" target="_brank">{{user_link.title}}</a>
+                    &nbsp;&nbsp;
+                {% endfor %}
+            </p>
+        </div>
+    </div>
+
+    <hr>
+    {% if member.topic_have %}
+    <h4>{{member.name}}的Topic</h4>
+      <div class="row">
+        {% for topic in member.topic %}
+        <div class="col-md-4">
+          <h3><a href="">{{topic.title}}</a></h3>
+          <div style="height:100px;overflow-y:hidden;">
+          <p>{{topic.description}} </p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% if member.topic_more_visual %}
+      <br>
+      <p><a class="btn btn-default" href="{% url 'member:member_topic_list' member.name %}" role="button">更多topic &raquo;</a></p>
+      {% endif %}
+    <hr>
+    {% endif %}
+
+    <!-- 评论 -->
+    <h4>给{{member.name}}捎句话</h4>
+
+    {% load comments %}
+
+    <div class="container">
+    <!-- 这里的user就是当前登录的用户 -->
+        {% if user.is_authenticated %} 
+            {% get_comment_form for member as form %}
+            <form action="{% comment_form_target %}" method="POST">
+            {% csrf_token %}
+            <!-- {{ form.comment }} -->
+            {{ form.content_type }}
+            {{ form.object_pk }}
+            {{ form.timestamp }}
+            {{ form.security_hash }}
+            <div class="row">
+                <div class="col-md-9">
+                    <a name="addcomments"><textarea id="id_comment" rows="5" name="comment" class="form-control" ></textarea></a>
+                </div>
+            </div>
+            <br>
+            <input type="hidden" name="next" value="{% url 'member:member_info_detail' member.name %}" />
+            <input type="submit" value="提交评论" id="id_submit" class="btn btn-primary"/>
+            <br>
+            </form>
+        {% else %}
+            <p>Please login to leave a comment.</p>
+        {% endif %}
+    </div>
+
+    <br>
+
+    <div class="container">
+        {% get_comment_list for member as comment_list %}
+        {% for comment in comment_list %}
+        <div class="row">
+            <div class="col-md-9">
+                <div class="row">
+                    <div class="col-md-2">
+                        <img typeof="foaf:Image" src="{{comment.user.avatar}}" width="50" height="50" alt="" /> 
+                        <p><b>{{comment.user.name}}</b></p>
+                    </div>
+                    <div class="col-md-10">
+                        <p>{{comment.comment}}</p>
+                        <p>{{comment.submit_date|date:"Y年m月d日H:i"}}</p>
+                        <br>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+
+</div>
+
+
+
+
+
+{% endblock %}
+
+
+
+
+

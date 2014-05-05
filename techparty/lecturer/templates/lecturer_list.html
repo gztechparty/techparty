@@ -1,0 +1,68 @@
+
+{% extends "base.html" %}
+
+{% block main %}
+<div class="container">
+{% for tmp_list_list in lectures_list %}
+    <div class="row">
+        {% for lecture_dict in tmp_list_list %}
+        <div class="col-md-4">
+            <a href="{% url 'member:member_info_detail' lecture_dict.name %}"><img typeof="foaf:Image" src="{{lecture_dict.img_url}}" width="200" height="200" alt="" /></a>   
+            <div>
+                <p id="collect_p_{{lecture_dict.name}}">{{lecture_dict.name}} ({{lecture_dict.stars.stars}} star(s))<p>
+                <p>
+                    <a href="javascript:void(0)" title="{{lecture_dict.stars.stars_title}}" id="collect_a_{{lecture_dict.name}}"><i class="fa fa-star fa-2x" style="color:{{lecture_dict.stars.stars_color}};" id="collect_{{lecture_dict.name}}"></i></a>
+                    <!-- 收藏的响应 -->
+                    <script type="text/javascript">
+                    $(document).ready(function(){
+                        $("#collect_{{lecture_dict.name}}").click(function(){
+                            {% if user.is_authenticated %} 
+                                $.getJSON("{% url 'member:member_collect' lecture_dict.name %}", function(json){
+                                    $("#collect_{{lecture_dict.name}}").css("color", json.stars_color);
+                                    $("#collect_a_{{lecture_dict.name}}").attr("title", json.stars_title);
+                                    var new_text = "{{lecture_dict.name}} (" + json.stars + " star(s))"
+                                    $("#collect_p_{{lecture_dict.name}}").text(new_text);
+                                });
+                            {% else %}
+                                alert("请先登录");
+                            {% endif %}
+                        });
+                    });
+                    </script>
+
+                    <a href="#" title="私信"><i class="fa fa-envelope-o fa-2x" style="color:black;"></i></a> 
+                    <a href="{% url 'member:member_info_detail' lecture_dict.name %}#addcomments" title="评论" style="color:black;"><i class="fa fa-comment-o fa-2x"></i></a>
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <hr>
+{% endfor %}
+
+<!-- 翻页 -->
+<div class="container">
+    <ul class="pager">
+        {% if pre_page.visible %}
+            <li class="previous first">
+                <a title="返回上一个页面" href="{% url 'lecturer:lecturer_list_view_page' pre_page.page %}">‹ 前一页</a>
+            </li>
+        {% else %}
+            <li class="previous first">&nbsp;</li>
+        {% endif %}
+        <li class="pager-current">{{page}} / {{total_page}}</li>
+        {% if next_page.visible %}
+            <li class="next last"><a title="去下一个页面" href="{% url 'lecturer:lecturer_list_view_page' next_page.page %}">下一页 ›</a></li>
+        {% else %}
+            <li class="next first">&nbsp;</li>
+        {% endif %}
+    </ul>
+</div>
+
+
+{% endblock %}
+
+
+
+
+

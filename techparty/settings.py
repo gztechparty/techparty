@@ -92,7 +92,7 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
@@ -121,6 +121,7 @@ INSTALLED_APPS = (
     'django.contrib.comments',
     'social.apps.django_app.default',
     'techparty.member',
+    'techparty.lecturer',
     'techparty.event',
     'techparty.wechat',
     'techparty.website',
