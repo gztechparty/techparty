@@ -1,12 +1,13 @@
 #encoding=utf-8
 
-from django.shortcuts import render
-from django.http import HttpResponse
 
-from techparty.member.models import User
-from tagging.models import Tag
+from django.http import HttpResponse
+from django.shortcuts import render
 from favorites.models import Favorite
-from django.utils import simplejson
+from tagging.models import Tag
+from techparty.member.models import User
+
+import json
 
 # Create your views here.
 
