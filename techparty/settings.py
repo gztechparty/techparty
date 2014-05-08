@@ -1,5 +1,13 @@
 #encoding=utf-8
 
+import os
+
+
+#TODO: change static path first 
+BASE_DIR = "/base/gump_project/techparty/gztechparty/techparty"
+
+
+
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -15,7 +23,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'techparty.db',
-        }
+    },
 }
 
 ALLOWED_HOSTS = ['2.techparty.sinaapp.com', 'techparty.sinaapp.com',
@@ -66,6 +74,9 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, "static"),
+
+    #"/base/gump_project/techparty/gztechparty/techparty/static",
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -76,7 +87,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -86,7 +97,7 @@ SECRET_KEY = 'z&amp;0r%^c_=-%+m-sw4qgdr5)mlc=t&amp;dz@@9^$yk^z(2hn6okica'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    #     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
