@@ -2,11 +2,7 @@
 
 import os
 
-
-#TODO: change static path first 
-BASE_DIR = "/base/gump_project/techparty/gztechparty/techparty"
-
-
+from xsettings import *
 
 
 DEBUG = True
