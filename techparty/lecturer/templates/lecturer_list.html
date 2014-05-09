@@ -1,5 +1,5 @@
 
-{% extends "base_foundation.html" %}
+{% extends "base.html" %}
 
 {% block main %}
 <div class="container">
@@ -12,6 +12,7 @@
                 <p id="collect_p_{{lecture_dict.name}}">{{lecture_dict.name}} ({{lecture_dict.stars.stars}} star(s))<p>
                 <p>
                     <a href="javascript:void(0)" title="{{lecture_dict.stars.stars_title}}" id="collect_a_{{lecture_dict.name}}"><i class="fa fa-star fa-2x" style="color:{{lecture_dict.stars.stars_color}};" id="collect_{{lecture_dict.name}}"></i></a>
+             
                     <!-- 收藏的响应 -->
                     <script type="text/javascript">
                     $(document).ready(function(){
@@ -39,6 +40,10 @@
     </div>
     <hr>
 {% endfor %}
+</div>
+
+
+
 
 <!-- 翻页 -->
 <div class="container">

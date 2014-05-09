@@ -12,39 +12,51 @@
         <script src="http://cdn.bootcss.com/html5shiv/3.7.0/html5shiv.min.js"></script>
         <script src="http://cdn.bootcss.com/respond.js/1.3.0/respond.min.js"></script>
     <![endif]-->
+
+
+    <script src="http://cdn.staticfile.org/jquery/2.1.1-rc2/jquery.min.js"></script>
+    <script src="http://cdn.staticfile.org/twitter-bootstrap/3.1.1/js/bootstrap.min.js"></script>
 </head>
 
 <body>
-    <script src="http://cdn.staticfile.org/jquery/2.1.1-rc2/jquery.min.js"></script>
-    <script src="http://cdn.staticfile.org/twitter-bootstrap/3.1.1/js/bootstrap.min.js"></script>
+   
     
-    <div class="page-header">
-      <div class="container" >
-        <h1>珠三角技术沙龙</h1>
-        <div style="float:left">
-        <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;打造泛珠三角地区技术人员的线上线下交流平台</h4>
+    <div class="navbar navbar-inverse" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">珠三角技术沙龙</a>
         </div>
-        <div style="float:right">
-            <ul class="nav nav-pills">
-              <li><a href="#">首页</a></li>
-              <li><a href="#">活动</a></li>
-              <li><a href="{% url 'lecturer:lecturer_list_view'%}">讲师</a></li>
-              <li><a href="#">主题</a></li>
-              <li><a href="#">直播</a></li>
-              <li><a href="#">Blog</a></li>
-              <li><a href="#">关于我们</a></li>
-            </ul>
-        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">首页</a></li>
+            <li><a href="#about">活动</a></li>
+            <li><a href="{% url 'lecturer:lecturer_list_view'%}">讲师</a></li>
+            <li><a href="#">主题</a></li>
+            <li><a href="#">直播</a></li>
+            <li><a href="#">博客</a></li>
+            <li><a href="#">关于我们</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
       </div>
     </div>
+
+
 
     {% block main %}{% endblock %}
 
     <div class="container">
-    <footer>
-        <hr> 
-    </footer>
+      <footer>
+          <hr> 
+      </footer>
     </div>
+
+
 </body>
 
 </html>
