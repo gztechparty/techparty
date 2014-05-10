@@ -1,8 +1,15 @@
 #encoding=utf-8
-from django.http import HttpResponse
-from django.contrib.auth.models import User
-from techparty.event.models import Participate, Event
+
 from datetime import datetime
+from django.contrib.auth.models import User
+from django.http import HttpResponse
+from django.shortcuts import render
+from techparty.event.models import Participate, Event
+
+
+def home(request):
+    context = { }
+    return render(request, 'home.html', context)
 
 
 def confirm_event(request, eid, key):
