@@ -11,6 +11,10 @@ def home(request):
     context = { }
     return render(request, 'home.html', context)
 
+def about(request):
+    context = { }
+    return render(request, 'about.html', context)
+
 
 def confirm_event(request, eid, key):
     """确认参加活动

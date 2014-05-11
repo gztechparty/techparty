@@ -1,0 +1,361 @@
+#sffotck-wrap-form {
+    display: block;
+    position: relative;
+    margin: 20px 0 20px;
+    padding: 0;
+}
+
+.sffotck-frontend-clear {
+    display: block;
+    position: relative;
+    clear: both;
+}
+
+#sffotck-wrap-form #sffotck-borderforform, #sffotck_widjet_wrap {
+    background: url('../images/border.png');
+    border-radius: 5px;
+    border:0px solid #fff;
+    padding:5px;
+    display:table;
+    margin: 0;
+    width: 100%;
+}
+
+#sffotck_widjet_wrap2 {
+    display:table;
+    margin: 12px 0;
+    width: 100%;
+}
+
+#sffotck_widjet_wrap #sffotck_widjet_title {
+    display: block;
+    position: relative;
+    margin: 5px 0;
+    font-weight: normal;
+    font-size: 14px;
+    color: #566E85;
+}
+
+#sffotck_widjet_wrap .replaceArea-error {
+    color: #8F1E1E;
+    font-size: 90%;
+    padding: 0 0 10px 0;
+}
+
+#sffotck_widjet_wrap .sffotck_cookie_enabled span {
+    border-bottom: 1px solid #367c28;
+    font: normal 12px Arial;
+}
+
+#sffotck-wrap-form #sffotck-formcontent {
+    background-color:#fff;
+    border-radius:3px;
+    font-family: Arial;
+    padding: 20px 30px;
+    margin: 0;
+}
+
+#sffotck_widjet_wrap #sffotck-internal-wrap {
+    background-color:#fff;
+    border-radius:3px;
+    font-family: Arial;
+    padding: 15px;
+    margin: 0;
+    border: 1px solid #D1D1D1;
+}
+
+#sffotck-wrap-form #sffotck-topside {
+    background: url('../images/mark.png') no-repeat top right;
+    padding: 0 80px 0 0;
+    border-bottom: 1px solid #e2e2e2;
+    margin: 0 0 18px 0;
+}
+
+#sffotck-wrap-form #sffotck-topside2 {
+background: url('../images/mark.png') no-repeat top right;
+padding-right: 80px;
+}
+
+#sffotck-wrap-form #sffotck-topside h3, #sffotck-wrap-form #sffotck-topside2 h3 {
+    font-size: 1.50em;
+    margin: 0;
+    padding: 0;
+    font-weight: 400;
+    color: #566E85;
+    font-family: arial;
+    line-height: 23px;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+#sffotck_widjet_wrap #widjet-sffotck-topside h3, #sffotck_widjet_wrap #sffotck-widjet-topside2 h3 {
+    font: normal 16px Arial;
+    color: #566e85;
+    text-align: center;
+    text-shadow: 0 0 1px #566E85;
+}
+
+#sffotck_widjet_wrap #widjet-sffotck-subtitle {
+    text-align: center;
+    font: normal 12px Arial;
+    color: #7c7c7c;
+    padding: 3px 0;
+}
+
+#sffotck_widjet_wrap #widjet-sffotck-topside {
+    display: block;
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
+
+#sffotck-wrap-form #sffotck-subtitle {
+    font-size:13px;
+    padding: 2px 0px 20px 2px;
+    margin: 0;
+    color: #7C7C7C;
+    line-height: 18px;
+}
+
+#sffotck-wrap-form #sffotck-forminput {
+    outline: none;
+    margin-top: 9px;
+    border: 0px transparent;
+    width: 100%;
+    color: #777;
+    background: transparent;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    line-height: 15px;
+    font: normal 13px Arial;
+    padding: 0 26px 0 0;
+}
+
+#sffotck_widjet_wrap #sffotck-forminput-widjet {
+    outline: none;
+    margin-top: 4px;
+    border: 0px transparent;
+    width: 100%;
+    color: #929292;
+    background: transparent;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    line-height: 16px;
+    font: normal 14px Arial;
+    padding: 0 24px 0 0;
+}
+
+#sffotck-wrap-form #sffotck-someinputs, #sffotck_widjet_wrap #sffotck-widjet-bottomside {
+    display: table;
+    width: 100%;
+    overflow: hidden;
+}
+
+#sffotck-wrap-form #sffotck-someinputs2 {
+    display:table;
+    width:100%;
+}
+
+#sffotck-wrap-form .inpt_wrap {
+    background-color: #FAFAFA;
+    border: 1px solid gainsboro;
+    height: 34px;
+    padding: 0px 15px;
+    margin: 0 0 18px 0;
+}
+
+#sffotck_widjet_wrap .inpt_wrap_widjet {
+    background-color: #ffffff;
+    border: 1px solid gainsboro;
+    height: 24px;
+    padding: 0px 7px;
+    margin: 0 0 12px 0;
+}
+
+#sffotck_widjet_wrap .inpt_wrap_widjet_necessarily {
+    background-color: #ffffff;
+    border: 1px solid #881212;
+    height: 24px;
+    padding: 0px 27px 0 7px;
+    margin: 0 0 7px 0;
+}
+
+#sffotck-wrap-form .inpt_wrap_necessarily {
+    background-color: #FAFAFA;
+    border: 1px solid #881212;
+    height: 34px;
+    padding: 0px 15px;
+    margin: 0 0 18px 0;
+}
+
+#sffotck-wrap-form table, #sffotck_widjet_wrap table {
+    border: 0px transparent;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#sffotck-wrap-form #sffotck-borderforform tr td {
+    overflow: hidden;
+    border: 0px transparent;
+    padding: 0px;
+    margin: 0px;
+    border-top: 0px transparent;
+    vertical-align: middle;
+}
+
+#sffotck-wrap-form #sffotck-formbutton2 {
+    background:url('../images/somebutt2.png') center top;
+    width:176px;
+    height:36px;
+    border:none;
+    cursor:pointer;
+    float:left;
+    margin: 0 20px 0 0;
+}
+
+#sffotck_widjet_wrap #widjet-submit-2 {
+    display: block;
+    position: relative;
+    background:url('../images/widjet-subscribe-button2.png') center top;
+    width:136px;
+    height:29px;
+    border:none;
+    cursor:pointer;
+    margin: 5px auto 0 auto;
+    padding: 0;
+}
+
+#sffotck-wrap-form #sffotck-formbutton3 {
+    background: url('../images/somebutt3.png') center top;
+    width:176px;
+    height:36px;
+    border: none;
+    cursor: pointer;
+    float: left;
+    margin-right: 20px;
+}
+
+#sffotck-wrap-form input:hover#sffotck-formbutton2, #sffotck-wrap-form input:hover#sffotck-formbutton3 {
+    background-position:0px -36px;
+}
+
+#sffotck-wrap-form input:active#sffotck-formbutton2, #sffotck-wrap-form input:active#sffotck-formbutton3 {
+    background-position:0px 36px;
+}
+
+#sffotck-wrap-form .sffotck-important {
+    background-image: url('../images/important.png');
+    background-repeat: no-repeat;
+    background-position: 100% 50%;
+}
+
+#sffotck_widjet_wrap .sffotck-important {
+    background-image: url('../images/important2.png');
+    background-repeat: no-repeat;
+    background-position: 100% 50%;
+}
+
+#sffotck-wrap-form #sffotck-submit {
+    background: url('../images/somebutt.png') center top;
+    width:176px;
+    height:36px;
+    border:none;
+    cursor:pointer;
+    float:left;
+    margin: 0 20px 0 0;
+    padding: 0;
+}
+
+#sffotck_widjet_wrap #widjet-submit-1, #sffotck_widjet_wrap #widjet-submit-3 {
+    display: block;
+    position: relative;
+    background: url('../images/widjet-subscribe-button.png') center top;
+    width: 136px;
+    height: 29px;
+    border: none;
+    cursor: pointer;
+    margin: 5px auto 0 auto;
+    padding: 0;
+}
+
+#sffotck-wrap-form input:hover#sffotck-submit {
+    background-position:0px -36px;
+}
+
+#sffotck-wrap-form input:active#sffotck-submit {
+    background-position:0px 36px;
+}
+	
+#sffotck-wrap-form #sffotck-importantinfo {
+    background: url('../images/important.png') 0 100% no-repeat;
+    color: #9E9E9E;
+    padding: 3px 0 0 23px;
+    font-size: 13px;
+    height: 17px;
+    display: block;
+    position: relative;
+    float: left;
+    padding-top: 10px;
+}
+
+#sffotck-wrap-form #sffotck-formcontent .replaceArea-error {
+    display: block;
+    position: relative;
+    margin: 0 0 18px 0;
+    font: normal 13px Arial;
+    color: #8F1E1E;
+    text-decoration: underline;
+}
+
+#sffotck-wrap-form #sffotck-remakepass {
+    float: right;
+    font-size: 13px;
+    padding: 0;
+    margin: 0;
+    font-family: Arial;
+}
+
+#sffotck_widjet_wrap2 #sffotck-widjet-haveemail {
+    display: block;
+    position: relative;
+    font-size: 13px;
+    padding: 0;
+    margin: 0 auto;
+    font-family: Arial;
+    text-align: center;
+}
+
+#sffotck-wrap-form #sffotck-remakepass span {
+    color:#0b3f56;
+    text-decoration:none;
+    border-bottom:1px dashed #0b3f56;
+    cursor: pointer;
+}
+
+#sffotck_widjet_wrap2 #sffotck-widjet-haveemail span {
+    color: #ff7f64;
+    text-decoration:none;
+    border-bottom:1px dashed #ff7f64;
+    cursor: pointer;
+}
+
+#sffotck-wrap-form #sffotck-remakepass span:hover {
+    color:#1e82af;
+    border-bottom:1px dashed #1e82af;
+}
+
+#sffotck_widjet_wrap2 #sffotck-widjet-haveemail span:hover {
+    color:#111111;
+    border-bottom:1px dashed #111111;
+}
+
+#sffotck-wrap-form #sffotck-sub-form, #sffotck-wrap-form #sffotck-sub-form2, #sffotck-wrap-form #sffotck-tab1, #sffotck-wrap-form #sffotck-tab2 {
+    display: none;
+    margin: 0;
+    padding: 0;
+}
+
+#sffotck_widjet_wrap #sffotck-widjet-form, #sffotck_widjet_wrap #sffotck-widjet-form2, #sffotck_widjet_wrap #sffotck-widjet-tab1, #sffotck_widjet_wrap #sffotck-widjet-tab2 {
+    display: none;
+}
