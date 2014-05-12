@@ -288,30 +288,30 @@ h6 {
 }
 h1,
 .h1 {
-  font-size: 61px;
+  font-size: 36px;
 }
 h2,
 .h2 {
-  font-size: 53px;
+  font-size: 28px;
 }
 h3,
 .h3 {
-  font-size: 40px;
+  font-size: 22px;
 }
 h4,
 .h4 {
-  font-size: 29px;
+  font-size: 20px;
 }
 h5,
 .h5 {
-  font-size: 28px;
+  font-size: 18px;
 }
 h6,
 .h6 {
-  font-size: 24px;
+  font-size: 16px;
 }
 p {
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.72222;
   margin: 0 0 15px;
 }
@@ -323,7 +323,7 @@ p {
 }
 @media (min-width: 768px) {
   .lead {
-    font-size: 30.006px;
+    font-size: 24px;
   }
 }
 small,
