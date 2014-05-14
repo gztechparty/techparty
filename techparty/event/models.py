@@ -8,6 +8,8 @@ from tagging.fields import TagField
 
 
 class Event(models.Model):
+    AREA = ((0, u'广州'),
+            (1, u'深圳'), (2, u'珠海'))
     name = models.CharField(u'活动名称', max_length=50)
     description = models.TextField(u'活动内容')
     slug = models.SlugField(u'slug', blank=True, null=True)
@@ -20,8 +22,7 @@ class Event(models.Model):
                                 verbose_name=u'发起人',
                                 blank=True, null=True)
     area = models.IntegerField(u'城市',
-                               choices=((0, u'广州'),
-                                        (1, u'深圳'), (2, u'珠海')))
+                               choices=AREA)
 
     # 微信公众号用
     url = models.URLField(u'活动网址', blank=True, null=True)
@@ -33,6 +34,10 @@ class Event(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    @property
+    def area_name(self):
+        return self.AREA[self.area][1]
 
     def can_confirm(self):
         print type(self.start_time)
