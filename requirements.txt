@@ -1,7 +1,10 @@
 django==1.6
 django-favorites
 django-tagging
+django-suit
 jsonfield
 python-social-auth
 south
 wechat
+simplejson
+

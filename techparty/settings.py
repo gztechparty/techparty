@@ -4,7 +4,6 @@ import os
 
 from xsettings import *
 
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 RUN_ON_SAE = False
@@ -112,20 +111,22 @@ ROOT_URLCONF = 'techparty.urls'
 WSGI_APPLICATION = 'techparty.wsgi.application'
 
 TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    # Put strings here, like "/home/html/django_templates" 
+    # or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
 )
 
 INSTALLED_APPS = (
+    'suit',
+    'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.comments',
     'django.contrib.contenttypes',
+    'django.contrib.messages',
     'django.contrib.sessions',
     'django.contrib.sites',
-    'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.admin',
-    'django.contrib.comments',
     'social.apps.django_app.default',
     'techparty.member',
     'techparty.lecturer',
@@ -168,8 +169,18 @@ LOGGING = {
     }
 }
 
+
+#suit
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
+TEMPLATE_CONTEXT_PROCESSORS = TCP + (
+    'django.core.context_processors.request',
+)
+
 DEBUG_SECRET = 'helloworld'
 TECHPARTY_OFFICIAL_TOKEN = ''
+
+
+
 
 try:
     from xsettings import *
