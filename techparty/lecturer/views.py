@@ -9,6 +9,7 @@ from techparty.member.views import member_collect_info
 # Create your views here.
 
 DEFAULT_SIZE = 9
+
 def _page(page, query, size=DEFAULT_SIZE):
     return query[(page - 1) * size: page * size]
 
@@ -33,7 +34,7 @@ def lecturer_list_view_page(request, page_id):
         lecture_dict = {}
         lecture_dict["name"] = lecture.name
         if lecture.avatar==None:
-            lecture_dict["img_url"] = "http://www.w3school.com.cn/i/w3school_logo_white.gif"
+            lecture_dict["img_url"] = "http://placehold.it/200x200"
         else:
             lecture_dict["img_url"] = lecture.avatar
         # 收藏的信息

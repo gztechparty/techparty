@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+
+{% block main %}
+    <div class="container">
+
+        <div class="row">
+            <div class="col-lg-8">
+
+                {% for event in events %}
+
+                <!-- blog entry -->
+                <h1><a href="#">{{event.name}}</a></h1>
+                <p class="lead">城市：{{event.area}} by <a href="index.php">{{event.sponsor}}</a></p>
+                <hr>
+                <p>
+                    <span class="glyphicon glyphicon-time"></span> {{event.create_time}}</p>
+                <hr>
+                <img src="http://placehold.it/900x300" class="img-responsive">
+                <hr>
+                <p>
+                    {{event.description}}
+                </p>
+
+                <a class="btn btn-primary" href="#">阅读全文 <span class="glyphicon glyphicon-chevron-right"></span></a>
+
+                <hr>
+
+                {% endfor %}
+                
+
+                <!-- pager -->
+                <ul class="pager">
+                    <li class="previous"><a href="#">&larr; 前一页</a>
+                    </li>
+                    <li class="next"><a href="#">下一页 &rarr;</a>
+                    </li>
+                </ul>
+
+            </div>
+
+            <div class="col-lg-4">
+                <!-- /well -->
+                <div class="well">
+                    <h4>Popular Blog Categories</h4>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <ul class="list-unstyled">
+                                <li><a href="#dinosaurs">Dinosaurs</a>
+                                </li>
+                                <li><a href="#spaceships">Spaceships</a>
+                                </li>
+                                <li><a href="#fried-foods">Fried Foods</a>
+                                </li>
+                                <li><a href="#wild-animals">Wild Animals</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-lg-6">
+                            <ul class="list-unstyled">
+                                <li><a href="#alien-abductions">Alien Abductions</a>
+                                </li>
+                                <li><a href="#business-casual">Business Casual</a>
+                                </li>
+                                <li><a href="#robots">Robots</a>
+                                </li>
+                                <li><a href="#fireworks">Fireworks</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- /well -->
+             
+            </div>
+        </div>
+
+        
+
+    </div>
+    <!-- /.container -->
+{% endblock %}
