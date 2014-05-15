@@ -7,9 +7,10 @@ from techparty.member.models import User
 from techparty.member.views import member_collect_info
 from techparty.xsettings import *
 from django.core.paginator import Paginator
+from techparty.website.views import nav_menu
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("django")
 
 def event_list_view(request):
     """ 活动列表页面 默认
@@ -30,9 +31,11 @@ def event_list_view_page(request, page_id):
 
     context["events"] = paged_events
 
-
+    context = nav_menu(request,context)
 
     return render(request, 'event_list.html', context)
+
+
 
 
 

@@ -184,11 +184,7 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-        'techparty.event.views': {
-            'handlers': ['console','file'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
+
     }
 }
 

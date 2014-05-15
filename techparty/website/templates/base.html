@@ -45,12 +45,15 @@
       </div>
       <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav">
-          <li class="active"><a href="/">首页</a></li>
-          <li><a href="/event">活动</a></li>
-          <li><a href="{% url 'lecturer:lecturer_list_view'%}">讲师</a></li>
-          <li><a href="/topic">主题</a></li>
-          <li><a href="/live">直播</a></li>
-          <li><a href="/about">关于</a></li>
+         
+          {% for menu in menus %}
+            {% if menu.active   %}
+              <li class="active"><a href="{{menu.url}}">{{menu.title}}</a></li>
+            {% else %}
+              <li><a href="{{menu.url}}">{{menu.title}}</a></li>
+            {% endif %}
+          {% endfor %}
+        
         </ul>
       </div><!--/.nav-collapse -->
     </div>

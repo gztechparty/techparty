@@ -6,6 +6,9 @@ from django.http import HttpResponse
 from techparty.member.models import User
 from techparty.member.views import member_collect_info
 
+from techparty.website.views import nav_menu
+
+
 # Create your views here.
 
 DEFAULT_SIZE = 9
@@ -42,6 +45,9 @@ def lecturer_list_view_page(request, page_id):
         lectures_list.append(lecture_dict)
 
     context["lectures_list"] = get_lecture_list_in_row(lectures_list)
+
+    context = nav_menu(request,context)
+
     return render(request, 'lecturer_list.html', context)
 
 def get_lecture_list_in_row(lectures_list):
