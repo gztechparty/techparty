@@ -28,17 +28,13 @@ def event_list_view_page(request, page_id):
     paginator = Paginator(events, DEFAULT_PAGE_SIZE)
     paged_events = paginator.page(page_id)
 
-    # paged_events = _page(request, events, 2, page_id)
-    # events_count = Event.objects.filter().count()
-    # events = Event.objects.filter().order_by('-start_time')
-
     context["events"] = paged_events
 
 
 
     return render(request, 'event_list.html', context)
 
-    
+
 
 """
 def _page(request, objects, size = DEFAULT_PAGE_SIZE, page = 1):
