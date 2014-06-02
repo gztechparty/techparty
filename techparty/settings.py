@@ -2,7 +2,9 @@
 
 import os
 
-from xsettings import *
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+
+DEFAULT_PAGE_SIZE = 20
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -170,7 +172,7 @@ LOGGING = {
         'file':{
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': 'logs/debug.log',
+            'filename': 'techparty.log',
         },
         'mail_admins': {
             'level': 'ERROR',

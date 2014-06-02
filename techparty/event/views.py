@@ -5,7 +5,7 @@ from django.shortcuts import render
 from techparty.event.models import Event
 from techparty.member.models import User
 from techparty.member.views import member_collect_info
-from techparty.xsettings import *
+from django.conf import settings
 from django.core.paginator import Paginator
 from techparty.website.views import nav_menu
 import logging
@@ -26,7 +26,7 @@ def event_list_view_page(request, page_id):
 
     events = Event.objects.filter().order_by('-start_time')
 
-    paginator = Paginator(events, DEFAULT_PAGE_SIZE)
+    paginator = Paginator(events, settings.DEFAULT_PAGE_SIZE)
     paged_events = paginator.page(page_id)
 
     context["events"] = paged_events
