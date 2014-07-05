@@ -8,7 +8,7 @@
 
 - 操作系统随意
 - python2.6以上
-- virtualenvwrapper看开发者习惯，建议使用。也可以配合[virtualenvwrapper](http://virtualenvwrapper.readthedocs.org/en/latest/)
+- virtualenvwrapper看开发者习惯，建议使用。[virtualenvwrapper](http://virtualenvwrapper.readthedocs.org/en/latest/)
 
 
 代码风格要求：
