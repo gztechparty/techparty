@@ -13,6 +13,7 @@ from django.core.validators import MaxLengthValidator
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 import sys
+import re
 
 interactive_cmds = {}
 
@@ -120,7 +121,7 @@ class RegisterEvent(ICommand):
 
     TRANSIT_MAP = {
         'start': (('confirm', {}), ('choose', {}), ('end', {})),
-        'confirm': (('end', {'Content': '1'}), ('cancel', {'Content': '0'})),
+        'confirm': (('end', {}), ('cancel', {'Content': '0'})),
         'choose': (('end', {}), ('cancel', {'Content': 'c'})),
     }
 
@@ -129,6 +130,13 @@ class RegisterEvent(ICommand):
         self.state.context['events'] = [e.to_dict() for e in events]
         self.state.context['has_info'] = self.user.first_name or \
             self.user.email
+        self.state.context['need_subject'] = False #默认为不需要主题
+        #是否需要他提交要分享的主题
+        if len( self.state.context.get('events', []) ) == 1:
+            event = self.state.context['events'][0]
+            print event
+            self.state.context['need_subject'] = event['need_subject']
+            self.state.context['entered_subject'] = False
 
     ################ Confirm State ################
 
@@ -138,8 +146,14 @@ class RegisterEvent(ICommand):
 
     def enter_confirm_state(self):
         event = self.state.context['events'][0]
-        ct = u'您确认报名参加在%s举行的"%s"？确认请回复1，取消请回复0' % (
-            event['start_time'], event['name'])
+        if self.state.context['need_subject']:
+            confirm_step = self.state.context.get('confirm_step', 0)
+            if confirm_step == 0:
+                ct = u'您确认报名参加在%s举行的"%s"？确认请回复1, 取消请回复0' % (event['start_time'], event['name'])
+            else:
+                ct = u'请回复您要分享的主题完成报名，无主题参与直接回复0'
+        else:
+            ct = u'您确认报名参加在%s举行的"%s"？确确认请回复1, 取消请回复0' % (event['start_time'], event['name'])
         return WxTextResponse(ct, self.wxreq)
 
     ################ Choose State ################
@@ -163,6 +177,28 @@ class RegisterEvent(ICommand):
         if self.state.state == 'start':
             return (not self.state.context.get('events', [])) or \
                    (not self.state.context.get('has_info', False))
+        elif self.state.state == 'confirm':
+            self.focus_on = u'无主题参与'
+            if self.state.context['need_subject']:
+                if self.state.context['entered_subject']:
+                    return True
+                confirm_step = self.state.context.get('confirm_step', 0)                
+                if confirm_step == 0:
+                    if self.wxreq.Content == '0': #cancel
+                        self.focus_on = u'无主题参与'
+                        return False
+                    else:
+                        self.state.context['confirm_step'] = 1 #让用户继续输入分享主题
+                        return False
+                else:
+                    if self.wxreq.Content == '0': #无主题参
+                        self.focus_on = u'无主题参与'
+                    else:
+                        self.focus_on = self.wxreq.Content
+                    return True
+            else:
+                return True
+            
         elif self.state.state == 'choose':
             if self.wxreq.MsgType == 'text':
                 try:
@@ -173,6 +209,7 @@ class RegisterEvent(ICommand):
             else:
                 self.state.context['error'] = u'请输入文字'
         return False
+    
 
     def end(self):
         if self.state.state == 'start':
@@ -185,8 +222,9 @@ class RegisterEvent(ICommand):
         elif self.state.state == 'choose' or self.state.state == 'confirm':
             index = int(self.wxreq.Content) if \
                 self.state.state == 'choose' else 0
+                
             event = self.state.context['events'][index]
-            pt = Participate(user=self.user, event_id=event['id'])
+            pt = Participate(user=self.user, event_id=event['id'], focus_on=self.focus_on)
             try:
                 pt.save()
             except IntegrityError:
@@ -393,6 +431,7 @@ class ProfileEdit(ICommand):
 
     def cancel(self):
         return WxTextResponse(u'已取消更改个人资料', self.wxreq)
+
 
 
 register_cmd(RegisterEvent)

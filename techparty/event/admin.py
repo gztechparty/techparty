@@ -11,7 +11,7 @@ from uuid import uuid4
 
 class EventAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'area', 'hashtag',
-                    'start_time', 'end_time')
+                    'start_time', 'end_time', 'need_subject')
     search_fields = ('name', 'description', 'slug', 'hashtag')
     list_filter = ('start_time', 'area')
 
@@ -50,7 +50,7 @@ class ParticipateAdmin(admin.ModelAdmin):
     markas_paid.short_description = u'标记为已收费'
 
     list_display = ('username', 'event',
-                    'signup_time', 'status', 'paid')
+                    'signup_time', 'status', 'paid','focus_on')
     list_filter = ('event', 'status')
     actions = [invite_user, reject_user, markas_checkin, markas_paid]
 
