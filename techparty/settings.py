@@ -3,7 +3,7 @@ import os.path
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-RUN_ON_SAE = False
+RUN_ON_SAE = True
 
 ADMINS = (
     ('jeff kit', 'jeff@techparty.org'),
