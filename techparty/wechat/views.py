@@ -32,6 +32,7 @@ def log_err():
 
 class TechpartyView(View, WxApplication):
 
+    debug_mode = True
     SECRET_TOKEN = settings.TECHPARTY_OFFICIAL_TOKEN
     WELCOME_TXT = u"""感谢关注珠三角技术沙龙！本号的职能：
 - 线下沙龙活动推送通知

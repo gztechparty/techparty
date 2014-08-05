@@ -1,5 +1,5 @@
 #encoding=utf-8
-
+import os.path
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -7,6 +7,7 @@ RUN_ON_SAE = False
 
 ADMINS = (
     ('jeff kit', 'jeff@techparty.org'),
+    ('tony', 'tonystark@smlme.com')
 )
 
 MANAGERS = ADMINS
@@ -66,6 +67,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static').replace('\\','/'),
 )
 
 # List of finder classes that know how to find static files in
@@ -151,7 +153,7 @@ LOGGING = {
 }
 
 DEBUG_SECRET = 'helloworld'
-TECHPARTY_OFFICIAL_TOKEN = ''
+TECHPARTY_OFFICIAL_TOKEN = 'TECHPARTY_OFFICIAL_TOKEN'
 
 try:
     from xsettings import *
