@@ -102,7 +102,7 @@ class TechpartyView(View, WxApplication):
 
     def is_valid_params(self, auth_params):
         if getattr(self, 'debug_mode', ''):
-            return True
+            return True, 'hello'
         else:
             return super(TechpartyView, self).is_valid_params(auth_params)
 
