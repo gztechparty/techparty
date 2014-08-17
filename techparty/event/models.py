@@ -29,6 +29,7 @@ class Event(models.Model):
     image = models.URLField(u'海报', blank=True, null=True)
     address = models.CharField(u'会场', max_length=200, blank=True, null=True)
     fee = models.IntegerField(u'费用', default=0)
+    need_subject = models.BooleanField(u'报名需分享主题', default=False)
 
     create_time = models.DateTimeField(auto_now_add=True)
 
@@ -54,6 +55,7 @@ class Event(models.Model):
             'id': self.id,
             'start_time': ts.decode('utf-8'),
             'area': self.area,
+            'need_subject': self.need_subject,
         }
 
     class Meta:
@@ -78,6 +80,10 @@ class Participate(models.Model):
     pay_amount = models.IntegerField(u'费用')
     confirm_key = models.CharField(max_length=50, blank=True, null=True,
                                    editable=False)
+    focus_on = models.CharField(u'分享主题', max_length=128,
+                                blank=True, null=True)
+    topic = models.CharField(u'分享主题', max_length=128,
+                             blank=True, null=True)
 
     def __unicode__(self):
         return u'%s@%s' % (self.user.first_name, self.event.name)
