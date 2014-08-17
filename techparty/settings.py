@@ -24,7 +24,7 @@ DATABASES = {
 }
 
 ALLOWED_HOSTS = ['2.techparty.sinaapp.com', 'techparty.sinaapp.com',
-                 'techparty.org']
+                 'techparty.org', 'techparty.sutui.me']
 
 
 # Local time zone for this installation. Choices can be found here:
