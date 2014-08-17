@@ -82,6 +82,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = u'用户'
         verbose_name_plural = u'用户'
+        db_table = 'auth_user'
 
 
 class UserLink(models.Model):
