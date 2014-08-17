@@ -1,7 +1,10 @@
 #encoding=utf-8
+import re
 from django.db import models
+from django.core import validators
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
+from django.utils import timezone
 from jsonfield import JSONField
 from tagging.fields import TagField
 from tagging.models import Tag
@@ -11,7 +14,7 @@ from uuid import uuid4
 class MemberManager(BaseUserManager):
     def create_user(self, username, password, **extra_fields):
         user = self.model(
-            name=username,
+            username=username,
             is_staff=False,
             is_active=True,
             is_superuser=False,
@@ -39,13 +42,18 @@ class MemberManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    name = models.CharField(u'姓名', max_length=100,
-                            unique=True, db_index=True)
-    nickname = models.CharField(u'昵称', max_length=100, blank=True, null=True)
-    email = models.EmailField(u'邮箱', unique=True)
+    username = models.CharField(
+        u'登录名', max_length=30, unique=True,
+        validators=[
+            validators.RegexValidator(re.compile('^[\w.@+-]+$'),
+                                      u'要求英文、数字或及下划线', 'invalid')
+        ])
+    first_name = models.CharField(u'名字', max_length=30, blank=True)
+    last_name = models.CharField(u'姓氏', max_length=30, blank=True)
+    email = models.EmailField(u'邮箱', blank=True)
     description = models.TextField(u'个人简介', blank=True, null=True)
     tags = TagField(u'标签')
-    
+
     avatar = models.URLField(u'头像', blank=True, null=True)
 
     is_lecturer = models.BooleanField(u'讲师', default=False)
@@ -62,10 +70,18 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     extra_data = JSONField(blank=True, null=True)
 
-    create_time = models.DateTimeField(auto_now_add=True)
+    date_joined = models.DateTimeField(u'加入时间', default=timezone.now)
 
-    USERNAME_FIELD = 'name'
+    USERNAME_FIELD = 'username'
     objects = MemberManager()
+
+    @property
+    def name(self):
+        return self.username
+
+    @property
+    def nickname(self):
+        return self.first_name
 
     def get_full_name(self):
         return self.nickname

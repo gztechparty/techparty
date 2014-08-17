@@ -8,6 +8,23 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Deleting model 'Tweet'
+        db.delete_table(u'event_tweet')
+
+        # Adding model 'Topic'
+        db.create_table(u'event_topic', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('event', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['event.Event'])),
+            ('title', self.gf('django.db.models.fields.CharField')(max_length=100)),
+            ('sub_title', self.gf('django.db.models.fields.CharField')(max_length=100)),
+            ('tags', self.gf('tagging.fields.TagField')()),
+            ('description', self.gf('django.db.models.fields.TextField')()),
+            ('author', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['member.User'])),
+            ('slide_file', self.gf('django.db.models.fields.URLField')(max_length=200, null=True, blank=True)),
+            ('slide_url', self.gf('django.db.models.fields.URLField')(max_length=200, null=True, blank=True)),
+        ))
+        db.send_create_signal(u'event', ['Topic'])
+
         # Adding model 'Photo'
         db.create_table(u'event_photo', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -22,10 +39,70 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'event', ['Photo'])
 
+        # Adding field 'Event.tags'
+        db.add_column(u'event_event', 'tags',
+                      self.gf('tagging.fields.TagField')(default=''),
+                      keep_default=False)
+
+        # Adding field 'Event.create_time'
+        db.add_column(u'event_event', 'create_time',
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2014, 8, 17, 0, 0), blank=True),
+                      keep_default=False)
+
+
+        # Changing field 'Event.address'
+        db.alter_column(u'event_event', 'address', self.gf('django.db.models.fields.CharField')(max_length=200, null=True))
+        # Adding field 'Participate.reason'
+        db.add_column(u'event_participate', 'reason',
+                      self.gf('django.db.models.fields.TextField')(null=True, blank=True),
+                      keep_default=False)
+
+        # Adding field 'Participate.pay_amount'
+        db.add_column(u'event_participate', 'pay_amount',
+                      self.gf('django.db.models.fields.IntegerField')(default=0),
+                      keep_default=False)
+
+        # Adding field 'Participate.topic'
+        db.add_column(u'event_participate', 'topic',
+                      self.gf('django.db.models.fields.CharField')(max_length=128, null=True, blank=True),
+                      keep_default=False)
+
 
     def backwards(self, orm):
+        # Adding model 'Tweet'
+        db.create_table(u'event_tweet', (
+            ('text', self.gf('django.db.models.fields.CharField')(max_length=280, null=True, blank=True)),
+            ('image', self.gf('django.db.models.fields.URLField')(max_length=200, null=True, blank=True)),
+            ('event', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['event.Event'])),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['member.User'])),
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('add_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+        ))
+        db.send_create_signal(u'event', ['Tweet'])
+
+        # Deleting model 'Topic'
+        db.delete_table(u'event_topic')
+
         # Deleting model 'Photo'
         db.delete_table(u'event_photo')
+
+        # Deleting field 'Event.tags'
+        db.delete_column(u'event_event', 'tags')
+
+        # Deleting field 'Event.create_time'
+        db.delete_column(u'event_event', 'create_time')
+
+
+        # Changing field 'Event.address'
+        db.alter_column(u'event_event', 'address', self.gf('django.db.models.fields.CharField')(max_length=100, null=True))
+        # Deleting field 'Participate.reason'
+        db.delete_column(u'event_participate', 'reason')
+
+        # Deleting field 'Participate.pay_amount'
+        db.delete_column(u'event_participate', 'pay_amount')
+
+        # Deleting field 'Participate.topic'
+        db.delete_column(u'event_participate', 'topic')
 
 
     models = {
@@ -61,6 +138,7 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'image': ('django.db.models.fields.URLField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
+            'need_subject': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
             'sponsor': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['member.User']", 'null': 'True', 'blank': 'True'}),
             'start_time': ('django.db.models.fields.DateTimeField', [], {}),
@@ -73,6 +151,7 @@ class Migration(SchemaMigration):
             'confirm_key': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
             'confirm_time': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'event': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['event.Event']"}),
+            'focus_on': ('django.db.models.fields.CharField', [], {'max_length': '128', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'paid': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'pay_amount': ('django.db.models.fields.IntegerField', [], {}),
@@ -80,6 +159,7 @@ class Migration(SchemaMigration):
             'reason': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'signup_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'status': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'topic': ('django.db.models.fields.CharField', [], {'max_length': '128', 'null': 'True', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['member.User']"})
         },
         u'event.photo': {
@@ -107,14 +187,15 @@ class Migration(SchemaMigration):
             'title': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
         u'member.user': {
-            'Meta': {'object_name': 'User'},
+            'Meta': {'object_name': 'User', 'db_table': "'auth_user'"},
             'avatar': ('django.db.models.fields.URLField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
             'birth_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'company': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'description': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'email': ('django.db.models.fields.EmailField', [], {'unique': 'True', 'max_length': '75'}),
+            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
             'extra_data': ('jsonfield.fields.JSONField', [], {'null': 'True', 'blank': 'True'}),
+            'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'gendar': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Group']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -123,12 +204,12 @@ class Migration(SchemaMigration):
             'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '100', 'db_index': 'True'}),
-            'nickname': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
+            'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'tags': ('tagging.fields.TagField', [], {}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
-            'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Permission']"})
+            'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Permission']"}),
+            'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
         }
     }
 
