@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.views.generic.base import View
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 from wechat.official import WxApplication
 from wechat.official import WxTextResponse
 from social.apps.django_app.default.models import UserSocialAuth
@@ -44,6 +45,10 @@ class TechpartyView(View, WxApplication):
 功能正在完善中，欢迎反馈。
 更多请惯性地输入help继续吧 :)
     """
+
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        return super(TechpartyView, self).dispatch(*args, **kwargs)
 
     def get(self, request):
         if '__text__' in request.GET and '__code__' in request.GET:
