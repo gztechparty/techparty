@@ -41,10 +41,12 @@
 `python manage.py syncdb`
 
 
-如果syncdb没有新建管理员帐号，也可以手动运行以下命令：    
+如果syncdb没有新建管理员帐号，也可以手动运行以下命令：
 新建管理员用户
 
 `python manage.py createsuperuser`
+
+（若执行失败，提示找不到xx表之类的，请先执行：`python manage.py migrate`）
 
 
 对了，默认情况下会使用sqlite做这数据库的backend，如果你在本地开发想要使用到mysql或其他，请在xsettings.py文件中替换DATABASE的配置信息。其他配置信息也可以在xsettings.py中覆盖。
