@@ -77,7 +77,7 @@ class Participate(models.Model):
     pay_time = models.DateTimeField(blank=True, null=True, editable=False)
     checkin_time = models.DateTimeField(blank=True, null=True, editable=False)
     paid = models.BooleanField(default=False, editable=False)
-    pay_amount = models.IntegerField(u'费用')
+    pay_amount = models.IntegerField(u'费用', default=0)
     confirm_key = models.CharField(max_length=50, blank=True, null=True,
                                    editable=False)
     focus_on = models.CharField(u'分享主题', max_length=128,

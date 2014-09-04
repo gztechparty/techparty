@@ -179,7 +179,7 @@ class TechpartyView(View, WxApplication):
                 social.save()
             except:
                 log_err()
-        ss = UserState.objects.filter(user=social.user.username)
+        ss = UserState.objects.filter(user=social.user)
         if ss:
             self.wxstate = ss[0]
         else:

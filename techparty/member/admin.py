@@ -59,7 +59,7 @@ class MyUserAdmin(UserAdmin):
     list_display = ('id','username', 'first_name',  'is_superuser', 'is_lecturer')
     list_filter = ('is_superuser',)
     fieldsets = (
-        (None, {'fields': ('name', )}),
+        (None, {'fields': ('username', )}),
         (u'基本信息', {'fields': ('password',
                                 'email',
                                 'is_lecturer',
@@ -80,7 +80,7 @@ class MyUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('namename', 'password1', 'password2')}
+            'fields': ('username', 'password1', 'password2')}
          ),
     )
     search_fields = ('username', 'first_name')

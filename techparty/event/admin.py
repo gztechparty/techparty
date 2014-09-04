@@ -10,7 +10,6 @@ from techparty.event.models import Topic
 from datetime import datetime
 from uuid import uuid4
 
-
 class PhotoAdmin(admin.ModelAdmin):
     pass
 

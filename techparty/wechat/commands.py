@@ -408,7 +408,7 @@ def events(wxreq, user):
     evns = Event.objects.filter(start_time__gt=datetime.now())
     if not evns:
         return WxTextResponse(u'近期暂无活动，感谢您的关注', wxreq)
-    articles = [WxArticle(Title=e.name, Description='',
+    articles = [WxArticle(Title=e.name, Description=e.description,
                           Url=e.url, PicUrl=e.image) for e in evns]
     return WxNewsResponse(articles, wxreq)
 

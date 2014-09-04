@@ -28,11 +28,10 @@ class MemberManager(BaseUserManager):
         return self.create_user(uuid4().get_hex(),
                                 self.make_random_password())
 
-    def create_superuser(self, name=None,
-                         password=None, **extra_fields):
-        user = self.create_user(name,
-                                password,
-                                **extra_fields
+    def create_superuser(self, username,
+                         password):
+        user = self.create_user(username,
+                                password
                                 )
         user.is_staff = True
         user.is_active = True
