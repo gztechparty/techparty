@@ -170,7 +170,8 @@ class TechpartyView(View, WxApplication):
         else:
             try:
                 user = User.objects.create_user('default_' +
-                                                str(random.randint(1, 10000)))
+                                                str(random.randint(1, 10000)),
+                                                None)
                 user.save()
                 user.username = 'wx_%d' % user.id
                 user.save()
