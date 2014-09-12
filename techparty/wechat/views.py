@@ -1,7 +1,7 @@
 #encoding=utf-8
 
 from django.http import HttpResponse
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.views.generic.base import View
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
@@ -20,6 +20,7 @@ else:
     from django.core.cache import cache
 import inspect
 import traceback
+User = get_user_model()
 
 
 def log_err():
