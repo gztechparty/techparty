@@ -201,7 +201,15 @@ DEBUG_SECRET = 'helloworld'
 TECHPARTY_OFFICIAL_TOKEN = ''
 
 
+# REDIS SETTINGS
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_DATABASE = 0
+REDIS_PASSWORD = ""
 
+# CELERY SETTINGS
+CELERY_BROKER = 'redis://:%s@%s:%d/%d' % (REDIS_PASSWORD, REDIS_HOST,
+                                          REDIS_PORT, REDIS_DATABASE)
 
 try:
     from xsettings import *
