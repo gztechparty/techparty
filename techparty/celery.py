@@ -6,7 +6,7 @@ from kombu import Exchange, Queue
 from celery import Celery
 from django.conf import settings
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+BASE_DIR = os.path.dirname(__file__)
 
 project_name = BASE_DIR.split(os.sep)[-1:][0]
 
