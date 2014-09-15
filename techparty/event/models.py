@@ -51,7 +51,6 @@ class Event(models.Model):
                            self.start_time.timetuple())
         return {
             'name': self.name,
-            'description': self.description,
             'id': self.id,
             'start_time': ts.decode('utf-8'),
             'area': self.area,

@@ -16,4 +16,10 @@ simplejson==3.6.2
 six==1.7.3
 South==1.0
 suit==2.0.2
-wechat==0.3.8
+wechat==0.4.1
+yafsm==0.1
+pytz
+gevent
+django-celery
+django-redis
+wechat

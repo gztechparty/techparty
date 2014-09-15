@@ -4,7 +4,6 @@ from wechat.official import WxArticle
 from wechat.official import WxNewsResponse
 from techparty.event.models import Event
 from techparty.event.models import Participate
-from techparty.wechat.models import UserState
 from datetime import datetime
 from wechat.official import WxTextResponse
 from django.db import IntegrityError
@@ -13,6 +12,9 @@ from django.core.validators import MaxLengthValidator
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 import sys
+from yafsm import BaseStateMachine
+from social.apps.django_app.default.models import UserSocialAuth
+from . import tasks
 
 interactive_cmds = {}
 
@@ -27,96 +29,12 @@ def register_cmd(command, name=None, alias=None):
         interactive_cmds[al] = command
 
 
-class ICommand(object):
-    """交互式命令的基类
-    """
-    TRANSIT_MAP = {}
-    COMMAND_NAME = 'noname'
-    COMMAND_ALIAS = 'nn'
-
-    @classmethod
-    def execute(cls, wxreq, user, state=None):
-        return cls(wxreq, user, state).process()
-
-    def __init__(self, wxreq, user, state=None):
-        self.wxreq = wxreq
-        self.user = user
-        self.state = state
-
-    def validate_transit_map(self):
-        pass
-
-    def process(self):
-        if not self.state:
-            self.state = UserState(user=self.user, command=self.COMMAND_NAME,
-                                   state='start', context={})
-            self.start()
-        assert self.TRANSIT_MAP, 'No TRANSIT_MAP define!'
-        branches = self.TRANSIT_MAP.get(self.state.state, '')
-        func = None
-        for branch in branches:
-            if self.should_transit(branch):
-                func = 'enter_%s_state' % branch[0]
-                ret = getattr(self, func)()
-                if branch[0] in ('end', 'cancel') and self.state.id:
-                    self.state.delete()
-                elif branch[0] != 'start' and branch[0] not in ('end',
-                                                                'cancel'):
-                    self.state.state = branch[0]
-                    self.state.save()
-                return ret
-        if not func:
-            # 不好意思，原地踏步，继续。
-            func = 'enter_%s_state' % self.state.state
-            retry = '%s_retry' % self.state.state
-            self.state.context[retry] = self.state.context.get(retry, 0) + 1
-            self.state.save()
-            if self.state.context.get('error', ''):
-                return WxTextResponse(self.state.context['error'], self.wxreq)
-            return getattr(self, func)()
-
-    def should_transit(self, branch):
-        if branch[1]:
-            collect_count = 0
-            for k, v in branch[1].iteritems():
-                if getattr(self.wxreq, k, '') == v:
-                    collect_count += 1
-            if collect_count == len(branch[1].keys()):
-                return True
-            return False
-        else:
-            # 检测有没有should_enter_xx_state方法
-            func = 'should_enter_%s_state' % branch[0]
-            if getattr(self, func):
-                return getattr(self, func)()
-            else:
-                return False
-
-    def start(self):
-        pass
-
-    def end(self):
-        pass
-
-    def cancel(self):
-        pass
-
-    def enter_start_state(self):
-        return self.start()
-
-    def enter_end_state(self):
-        return self.end()
-
-    def enter_cancel_state(self):
-        return self.cancel()
-
-
-class RegisterEvent(ICommand):
+class RegisterEvent(BaseStateMachine):
     """用户状态
     - 等待用户选择活动或确认。
     """
     COMMAND_NAME = u'报名'
-    COMMAND_ALIAS = u'er,報名'
+    COMMAND_ALIAS = u'er,報名,bm'
 
     TRANSIT_MAP = {
         'start': (('confirm', {}), ('choose', {}), ('end', {})),
@@ -124,87 +42,94 @@ class RegisterEvent(ICommand):
         'choose': (('end', {}), ('cancel', {'Content': 'c'})),
     }
 
-    def start(self):
+    def init_context(self):
+        print self.user.first_name
         events = Event.objects.filter(start_time__gt=datetime.now())
-        self.state.context['events'] = [e.to_dict() for e in events]
-        self.state.context['has_info'] = self.user.first_name or \
-            self.user.email
+        return {'events': [e.to_dict() for e in events],
+                'has_info': self.user.first_name or self.user.email}
 
-    ################ Confirm State ################
+    ################ Start State ################
 
-    def should_enter_confirm_state(self):
-        return len(self.state.context.get('events', [])) == 1 and \
-            self.state.context.get('has_info', False)
+    def should_enter_confirm_from_start(self):
+        return len(self.context.get('events', [])) == 1 and \
+            self.context.get('has_info', False)
 
-    def enter_confirm_state(self):
-        event = self.state.context['events'][0]
+    def should_enter_choose_from_start(self):
+        return len(self.context.get('events', [])) > 1 and \
+            self.context.get('has_info', False)
+
+    def should_enter_end_from_start(self):
+        return (not self.context.get('events', [])) or \
+            (not self.context.get('has_info', False))
+
+     ################ Confirm State ################
+
+    def enter_confirm_from_start(self):
+        event = self.context['events'][0]
         ct = u'您确认报名参加在%s举行的"%s"？确认请回复1，取消请回复0' % (
             event['start_time'], event['name'])
-        return WxTextResponse(ct, self.wxreq)
+        return WxTextResponse(ct, self.obj)
 
     ################ Choose State ################
 
-    def should_enter_choose_state(self):
-        return len(self.state.context.get('events', [])) > 1 and \
-            self.state.context.get('has_info', False)
-
-    def enter_choose_state(self):
+    def enter_choose_from_start(self):
         ct = u'目前有多个活动正接受报名，请输入活动序号完成报名,输入c退出:'
         index = 0
-        for e in self.state.context['events']:
+        for e in self.context['events']:
             ct += u'序号：%d，活动：%s，举办时间：%s' %\
                   (index, e['name'], e['start_time'])
             index += 1
-        return WxTextResponse(ct, self.wxreq)
+        return WxTextResponse(ct, self.obj)
+
+    def should_enter_end_from_choose(self):
+        if self.obj.MsgType == 'text':
+            try:
+                return int(self.obj.Content) in \
+                    range(len(self.context['events']))
+            except:
+                return False
+        else:
+            self.error = u'请输入文字'
+        return False
 
     ################ End State ################
 
-    def should_enter_end_state(self):
-        if self.state.state == 'start':
-            return (not self.state.context.get('events', [])) or \
-                   (not self.state.context.get('has_info', False))
-        elif self.state.state == 'choose':
-            if self.wxreq.MsgType == 'text':
-                try:
-                    return int(self.wxreq.Content) in \
-                        range(len(self.state.context['events']))
-                except:
-                    return False
-            else:
-                self.state.context['error'] = u'请输入文字'
-        return False
+    def enter_end_from_start(self):
+        if self.context['has_info']:
+            return WxTextResponse(u'近期暂无活动，感谢您的关注',
+                                  self.obj)
+        else:
+            return WxTextResponse(u'您的个人资料不齐，请回复ei补全再报名',
+                                  self.obj)
 
-    def end(self):
-        if self.state.state == 'start':
-            if self.state.context['has_info']:
-                return WxTextResponse(u'近期暂无活动，感谢您的关注',
-                                      self.wxreq)
-            else:
-                return WxTextResponse(u'您的个人资料不齐，请回复ei补全再报名',
-                                      self.wxreq)
-        elif self.state.state == 'choose' or self.state.state == 'confirm':
-            index = int(self.wxreq.Content) if \
-                self.state.state == 'choose' else 0
-            event = self.state.context['events'][index]
-            pt = Participate(user=self.user, event_id=event['id'])
-            try:
-                pt.save()
-            except IntegrityError:
-                info = sys.exc_info()
-                print info[0], info[1], info[2]
-            except:
-                return WxTextResponse(u'小子你摊上事儿了，报名不成功，到微博' +
-                                      u'找@jeff_kit 帮你搞定吧！', self.wxreq)
-            ct = u'您已成功报名"%s",敬请留意邀请邮件。' % event['name']
-            return WxTextResponse(ct, self.wxreq)
+    def enter_end_from_confirm(self):
+        return self.register_event(self.context['events'][0])
+
+    def enter_end_from_choose(self):
+        index = int(self.obj.Content)
+        event = self.context['events'][index]
+        return self.register_event(event)
+
+    def register_event(self, event):
+        pt = Participate(user=self.user, event_id=event['id'])
+        try:
+            pt.save()
+        except IntegrityError:
+            info = sys.exc_info()
+            print info[0], info[1], info[2]
+        except:
+            return WxTextResponse(u'小子你摊上事儿了，报名不成功，到微信' +
+                                  u'找@jeff_kit 帮你搞定吧！', self.obj)
+        ct = u'您已成功报名"%s",敬请留意邀请信息。' % event['name']
+        return WxTextResponse(ct, self.obj)
 
     def cancel(self):
-        return WxTextResponse(u'您已取消报名,感谢关注', self.wxreq)
+        return WxTextResponse(u'您已取消报名,感谢关注', self.obj)
 
 
-class RegisterConfirm(ICommand):
+class RegisterConfirm(BaseStateMachine):
     COMMAND_NAME = u'确认报名'
-    COMMAND_ALIAS = u'rc'
+    COMMAND_ALIAS = u'rc,qr'
 
     TRANSIT_MAP = {
         'start': (('confirm', {}), ('choose', {}), ('end', {})),
@@ -219,77 +144,87 @@ class RegisterConfirm(ICommand):
             'eid': pt.event.id
         }
 
-    def start(self):
+    def init_context(self):
         pts = Participate.objects.filter(user=self.user, status=1,
                                          event__start_time__gt=datetime.now())
-        self.state.context['pts'] = [self.pt2dict(pt) for pt in pts]
+        return {'pts': [self.pt2dict(pt) for pt in pts]}
 
-    def should_enter_confirm_state(self):
+    ############## Start State #################
+
+    def should_enter_confirm_from_start(self):
         """如果只有一个活动就直接确认了。
         """
-        return len(self.state.context.get('pts', [])) == 1
+        return len(self.context.get('pts', [])) == 1
 
-    def enter_confirm_state(self):
+    def should_enter_choose_from_start(self):
+        return len(self.context.get('pts', [])) > 1
+
+    def should_enter_end_from_start(self):
+        return not self.context.get('pts', [])
+
+    ############## Comfirm State ##################
+
+    def enter_confirm_from_start(self):
         """让用户确认报名还是取消报名
         """
-        print 'enter confirm state'
-        pt = self.state.context['pts'][0]
+        pt = self.context['pts'][0]
         event = Event.objects.get(id=pt['eid'])
-        ct = u"""您确认出席“%s”活动吗？
+        ct = u"""您确认出席"%s"活动吗？
 地址：%s
 时间：%s
 场地人均消费：%d元
-出席请回复1，取消请回复0:""" % (event.name, event.address,
-                            event.start_time, event.fee)
-        return WxTextResponse(ct, self.wxreq)
+出席请回复1，取消请回复0:"""
+        ct = ct % (event.name, event.address, event.start_time, event.fee)
+        return WxTextResponse(ct, self.obj)
 
-    def should_enter_choose_state(self):
-        return len(self.state.context.get('pts', [])) > 1
+    ############# choose State #####################
 
-    def enter_choose_state(self):
-        print 'enter choose state'
+    def enter_choose_from_start(self):
         ct = u'目前有多个活动需要确认，请输入序号，回复c退出:'
         index = 0
-        for pt in self.state.context['pts']:
+        for pt in self.context['pts']:
             ct += u'序号: %d, 活动：%s' % (index, pt['event'])
             index += 1
-        return WxTextResponse(ct, self.wxreq)
+        return WxTextResponse(ct, self.obj)
 
-    def should_enter_end_state(self):
-        print 'should enter end state?'
-        if self.state.state == 'start':
-            return not self.state.context.get('pts', [])
-        elif self.state.state == 'choose':
-            if self.wxreq.MsgType == 'text':
-                try:
-                    return int(self.wxreq.Context) in \
-                        range(len(self.state.ontext['pts']))
-                except:
-                    return False
-            else:
-                self.state.context['error'] = u'请输入文字'
-
-    def end(self):
-        print ''
-        if self.state.state == 'start':
-            return WxTextResponse(u'未找到需要确认的活动', self.wxreq)
+    def should_enter_end_from_choose(self):
+        if self.obj.MsgType == 'text':
+            try:
+                return int(self.obj.Content) in \
+                    range(len(self.context['pts']))
+            except:
+                return False
         else:
-            index = int(self.wxreq.Content) if \
-                self.state.state == 'choose' else 0
-            pt = self.state.context['pts'][index]
-            name = pt['event']
-            pt = Participate.objects.get(id=pt['id'])
-            pt.status = 3
-            pt.save()
+            self.context['error'] = u'请输入文字'
+        return False
 
-            ct = u'您已确认参加"%s"，届时请准时出席。' % name
-            return WxTextResponse(ct, self.wxreq)
+    ############## End State ##############
+    def enter_end_from_start(self):
+        return WxTextResponse(u'未找到需要确认的活动', self.obj)
+
+    def enter_end_from_confirm(self):
+        pt = self.context['pts'][0]
+        return self.confirm_event(pt)
+
+    def enter_end_from_choose(self):
+        index = int(self.obj.Content)
+        pt = self.context['pts'][index]
+        return self.confirm_event(pt)
+
+    def confirm_event(self, pt):
+        name = pt['event']
+        pt = Participate.objects.get(id=pt['id'])
+        pt.status = 3
+        pt.save()
+
+        ct = u'您已确认参加"%s"，届时请准时出席。' % name
+        return WxTextResponse(ct, self.obj)
 
     def cancel(self):
-        return WxTextResponse(u'已取消确认。', self.wxreq)
+        return WxTextResponse(u'已取消确认。', self.obj)
 
 
-class ProfileEdit(ICommand):
+class ProfileEdit(BaseStateMachine):
     """修改用户的个人资料。
     用户昵称及Email是必填项。
     """
@@ -298,7 +233,7 @@ class ProfileEdit(ICommand):
 
     TRANSIT_MAP = {
         'start': (('edit', {}),),
-        'edit': (('end', {}), ('cancel', {'Content': 'c'})),
+        'edit': (('cancel', {'Content': 'c'}), ('end', {})),
     }
 
     PROFILE_FIELDS = (('name', u'姓名', {'max_length': 10}),
@@ -324,7 +259,7 @@ class ProfileEdit(ICommand):
                     return u'请输入正确的网址：'
 
     def find_next_field(self):
-        data = self.state.context.get('data', {})
+        data = self.context.get('data', {})
         index = 0
         for field in self.PROFILE_FIELDS:
             if field[0] not in data.keys():
@@ -332,72 +267,137 @@ class ProfileEdit(ICommand):
             index += 1
         return -1
 
-    def start(self):
-        self.state.context['original_data'] = {'name': self.user.first_name,
-                                               'email': self.user.email}
+    def init_context(self):
+        return {'original_data': {'name': self.user.first_name,
+                                  'email': self.user.email}}
 
-    def should_enter_edit_state(self):
+    ############ start State ###############
+
+    def should_enter_edit_from_start(self):
         return True
 
-    def enter_edit_state(self):
+    ############ Edit State ################
+
+    def next_field(self):
+        """要求用户输入下一个字段
         """
-        会有多次进入该状态。每次判断修改到哪个信息了，显示不同的提示。
-        """
-        data = self.state.context.get('data', {})
-        original = self.state.context['original_data']
+        data = self.context.get('data', {})
+        original = self.context['original_data']
         for field in self.PROFILE_FIELDS:
             if field[0] not in data.keys():
                 ct = u'请输入%s:' % field[1]
                 if original.get(field[0], ''):
                     ct = u'请输入%s (原%s，输入s跳过此项):' % \
                          (field[1], original[field[0]])
-                return WxTextResponse(ct, self.wxreq)
+                return ct
 
-    def should_enter_end_state(self):
+    def enter_edit_from_start(self):
+        """要求用户输入下一个字段
         """
-        如果未修改完，则继续，否则结束。
-        如果用户选择跳过，则进入结束
+        return WxTextResponse(self.next_field(), self.obj)
+
+    def should_enter_end_from_edit(self):
+        """
+        1、检查用户输入：
+        - s，跳过，
+        - 不合法输入，抛异常
+        - 合法输入，保存，找下一个字段，无则返回True
+        2、判断完成个数，一致则返回True，否则返回False。
         """
         next = self.find_next_field()
         if next < 0:
             return True
-        if self.wxreq.MsgType != 'text':
-            self.state.context['error'] = u'请输入文字'
+        if self.obj.MsgType != 'text':
+            self.error = u'请输入文字'
             return False
-        data = self.state.context.get('data', {})
+
+        data = self.context.get('data', {})
         field = self.PROFILE_FIELDS[next]
-        if self.wxreq.Content == 's':
-            value = self.state.context['original_data'].get(field[0], '')
+        if self.obj.Content.lower() == 's':
+            value = self.context['original_data'].get(field[0], '')
             data[field[0]] = value
         elif len(field) > 2:
-            error = self.validate_value_for_field(self.wxreq.Content, field[2])
+            error = self.validate_value_for_field(self.obj.Content, field[2])
             if error:
-                self.state.context['error'] = error
+                self.error = error
                 return False
         if field[0] not in data:
-            data[field[0]] = self.wxreq.Content
-        self.state.context['data'] = data
+            data[field[0]] = self.obj.Content
+        self.context['data'] = data
+
         if len(self.PROFILE_FIELDS) - next == 1:
             return True
-        if self.state.context.get('error', ''):
-            del self.state.context['error']
+        self.error = self.next_field()
+        return False
+
+    ############## End State ##############
 
     def end(self):
-        data = self.state.context.get('data', None)
+        data = self.context.get('data', None)
         if not data:
-            return WxTextResponse(u'已取消更改', self.wxreq)
+            return WxTextResponse(u'已取消更改', self.obj)
         self.user.first_name = data['name']
         self.user.email = data['email']
         self.user.save()
-        return WxTextResponse(u'更改个人资料成功！', self.wxreq)
+        return WxTextResponse(u'更改个人资料成功！', self.obj)
 
     def cancel(self):
-        return WxTextResponse(u'已取消更改个人资料', self.wxreq)
+        return WxTextResponse(u'已取消更改个人资料', self.obj)
 
+
+class BindWechat(BaseStateMachine):
+
+    COMMAND_NAME = u'绑定微信号'
+    COMMAND_ALIAS = u'bd,绑定,db'
+
+    TRANSIT_MAP = {
+        'start': (('input', {}),
+                  ('end', {})),
+        'input': (('cancel', {'Content': '0'}),
+                  ('end', {}))
+        }
+
+    def init_context(self):
+        # 查询当前用户是否有绑定微信帐号。
+        social = UserSocialAuth.objects.filter(provider='weixin',
+                                               user=self.user)
+        data = social.extra_data
+        if 'wechat_account' in data:
+            return {'wechat': data['wechat_account']}
+        return {}
+
+    def should_enter_input_from_start(self):
+        return 'wechat_account' not in self.context
+
+    def enter_input_from_start(self):
+        return WxTextResponse(u'请输入您的微信号，回复0取消', self.obj)
+
+    def cancel(self):
+        return WxTextResponse(u'已取消绑定微信号', self.obj)
+
+    def should_enter_end_from_start(self):
+        """如果用户已绑定帐号，则直接退出。
+        """
+        return 'wechat_account' in self.context
+
+    def enter_end_from_start(self):
+        msg = u'您已经绑定了微信帐号 %s ' % self.user.wechat
+        return WxTextResponse(msg, self.obj)
+
+    def should_enter_end_from_input(self):
+        return True
+
+    def enter_end_from_input(self):
+        """向用户发送一条预览信息，如果不成功则发送错误信息。
+        """
+        #tasks.validate_wechat_account.delay(self.obj.Content,
+        #                                    self.obj.FromUserName)
+        return WxTextResponse(u'正在验证您的微信号，请稍候 ...', self.obj)
 
 register_cmd(RegisterEvent)
 register_cmd(RegisterConfirm)
 register_cmd(ProfileEdit)
+register_cmd(BindWechat)
 
 
 ############## simple command ############
@@ -435,7 +435,7 @@ def register_events(wxreq, user):
         for pt in pts:
             if pt.status not in (1, 3):
                 names = u"%s(%s)" % (pt.event.name,
-                                                pt.get_status())
+                                     pt.get_status())
                 ct = ct + u'您已经报名参加了 %s\n' % names
             else:
                 ct = ct + u'%s,您己受邀请参加下面的活动，届时请准时出席！\n' % user.first_name
