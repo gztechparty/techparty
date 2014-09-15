@@ -19,3 +19,7 @@ suit==2.0.2
 wechat==0.4.1
 yafsm==0.1
 pytz
+gevent
+django-celery
+django-redis
+wechat

@@ -13,6 +13,8 @@ from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 import sys
 from yafsm import BaseStateMachine
+from social.apps.django_app.default.models import UserSocialAuth
+from . import tasks
 
 interactive_cmds = {}
 
@@ -134,7 +136,7 @@ class RegisterConfirm(BaseStateMachine):
         'confirm': (('end', {'Content': '1'}), ('cancel', {'Content': '0'})),
         'choose': (('end', {}), ('cancel', {'Content': 'c'})),
     }
- 
+
     def pt2dict(self, pt):
         return {
             'id': pt.id,
@@ -171,8 +173,8 @@ class RegisterConfirm(BaseStateMachine):
 地址：%s
 时间：%s
 场地人均消费：%d元
-出席请回复1，取消请回复0:""" % (event.name, event.address,
-                                event.start_time, event.fee)
+出席请回复1，取消请回复0:"""
+        ct = ct % (event.name, event.address, event.start_time, event.fee)
         return WxTextResponse(ct, self.obj)
 
     ############# choose State #####################
@@ -288,7 +290,7 @@ class ProfileEdit(BaseStateMachine):
                     ct = u'请输入%s (原%s，输入s跳过此项):' % \
                          (field[1], original[field[0]])
                 return ct
-    
+
     def enter_edit_from_start(self):
         """要求用户输入下一个字段
         """
@@ -308,7 +310,7 @@ class ProfileEdit(BaseStateMachine):
         if self.obj.MsgType != 'text':
             self.error = u'请输入文字'
             return False
-        
+
         data = self.context.get('data', {})
         field = self.PROFILE_FIELDS[next]
         if self.obj.Content.lower() == 's':
@@ -323,7 +325,6 @@ class ProfileEdit(BaseStateMachine):
             data[field[0]] = self.obj.Content
         self.context['data'] = data
 
-        
         if len(self.PROFILE_FIELDS) - next == 1:
             return True
         self.error = self.next_field()
@@ -344,9 +345,59 @@ class ProfileEdit(BaseStateMachine):
         return WxTextResponse(u'已取消更改个人资料', self.obj)
 
 
+class BindWechat(BaseStateMachine):
+
+    COMMAND_NAME = u'绑定微信号'
+    COMMAND_ALIAS = u'bd,绑定,db'
+
+    TRANSIT_MAP = {
+        'start': (('input', {}),
+                  ('end', {})),
+        'input': (('cancel', {'Content': '0'}),
+                  ('end', {}))
+        }
+
+    def init_context(self):
+        # 查询当前用户是否有绑定微信帐号。
+        social = UserSocialAuth.objects.filter(provider='weixin',
+                                               user=self.user)
+        data = social.extra_data
+        if 'wechat_account' in data:
+            return {'wechat': data['wechat_account']}
+        return {}
+
+    def should_enter_input_from_start(self):
+        return 'wechat_account' not in self.context
+
+    def enter_input_from_start(self):
+        return WxTextResponse(u'请输入您的微信号，回复0取消', self.obj)
+
+    def cancel(self):
+        return WxTextResponse(u'已取消绑定微信号', self.obj)
+
+    def should_enter_end_from_start(self):
+        """如果用户已绑定帐号，则直接退出。
+        """
+        return 'wechat_account' in self.context
+
+    def enter_end_from_start(self):
+        msg = u'您已经绑定了微信帐号 %s ' % self.user.wechat
+        return WxTextResponse(msg, self.obj)
+
+    def should_enter_end_from_input(self):
+        return True
+
+    def enter_end_from_input(self):
+        """向用户发送一条预览信息，如果不成功则发送错误信息。
+        """
+        #tasks.validate_wechat_account.delay(self.obj.Content,
+        #                                    self.obj.FromUserName)
+        return WxTextResponse(u'正在验证您的微信号，请稍候 ...', self.obj)
+
 register_cmd(RegisterEvent)
 register_cmd(RegisterConfirm)
 register_cmd(ProfileEdit)
+register_cmd(BindWechat)
 
 
 ############## simple command ############
