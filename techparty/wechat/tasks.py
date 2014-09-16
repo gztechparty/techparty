@@ -40,7 +40,7 @@ def dispatch_message(user, msg_type, content,
     _dispatch_message(user, msg_type, content,
                       msg_id, channel)
 
-@task(name='send_messages', ignore_result=True)
+@app.task(name='send_messages', ignore_result=True)
 def send_messages(email_messages):
     """创建一个Django的SMTP Email发送器，在队列中发送。
     """
