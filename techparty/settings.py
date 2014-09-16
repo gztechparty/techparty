@@ -202,7 +202,7 @@ TECHPARTY_OFFICIAL_TOKEN = ''
 
 
 # REDIS SETTINGS
-REDIS_HOST = 'localhost'
+REDIS_HOST = '127.0.0.1'
 REDIS_PORT = 6379
 REDIS_DATABASE = 0
 REDIS_PASSWORD = ""
@@ -210,6 +210,22 @@ REDIS_PASSWORD = ""
 # CELERY SETTINGS
 CELERY_BROKER = 'redis://:%s@%s:%d/%d' % (REDIS_PASSWORD, REDIS_HOST,
                                           REDIS_PORT, REDIS_DATABASE)
+
+CACHES = {
+    'default': {
+        'BACKEND': 'redis_cache.cache.RedisCache',
+        'LOCATION': ':'.join((REDIS_HOST, REDIS_PORT, REDIS_DATABASE))
+        'OPTIONS': {
+            'CLIENT_CLASS': 'redis_cache.client.DefaultClient',
+            'PASSWORD': REDIS_PASSWORD,
+            'SOCKET_TIMEOUT': 5,
+        }
+    }
+}
+
+
+WECHAT_APP_KEY = ''
+WECHAT_APP_SECRET = ''
 
 try:
     from xsettings import *

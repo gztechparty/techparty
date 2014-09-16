@@ -2,7 +2,6 @@
 from wechat.official import WxApi
 from gevent.event import AsyncResult
 from gevent.coros import BoundedSemaphore
-import redis
 from django.core.cache import cache
 from django.conf import settings
 import logging
@@ -10,18 +9,16 @@ import random
 import sys
 import json
 import requests
-from member.models import User
+from redis_cache import get_redis_connection
 from . import tasks
 
 log = logging.getLogger(__name__)
 
 wxapi = WxApi(settings.WECHAT_APP_KEY,
               settings.WECHAT_APP_SECRET,
-              host='http://wechat.toraysoft.com/api')
+              host='http://wxl.diange.fm/api/cgi-bin/')
 
-rds = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT,
-                  db=settings.REDIS_DATABASE,
-                  password=settings.REDIS_PASSWORD)
+rds = get_redis_connection('default')
 
 ACCESS_TOKEN_CACHE_KEY = 'techparty_wechat_access_token'
 ACCESS_TOKEN_REFRESH_FLAG = 'techparty_wechat_token_refreshing'
@@ -139,13 +136,13 @@ def _dispatch_message(user, msg_type, content,
                     token = TokenRefresher.refresh_wechat_token()
                     wxapi._access_token = token
                 elif err.code == 45015:
-                    # 用户48小时内无互动,尝试发预览
-                    return send_message_in_preview(user, msg_type, content,
-                                                   msg_id, channel)
+                    # 用户48小时内无互动, 通过微信号发送
+                    return send_message_via_account(user, msg_type, content,
+                                                    msg_id, channel)
                 elif err.code == 45002 and msg_type == 'text':
-                    # 超长消息, 转换成预览格式
-                    return send_message_in_preview(user, msg_type, content,
-                                                   msg_id, channel)
+                    # 超长消息, 通过微信号发送
+                    return send_message_via_account(user, msg_type, content,
+                                                    msg_id, channel)
                 else:
                     return 'unknow error'
             else:
@@ -160,33 +157,13 @@ def _dispatch_message(user, msg_type, content,
         return u'exception occur'
 
 
-def send_message_in_preview(openid, msg_type, content,
-                            msg_id=None, channel=None):
-    """发送预览消息。
-    图片 -> 图文，您有一条图片消息，回复msgmsgid直接查看。
-    图文 -> 图文,
-    文本 -> 图文, 进行格式转换
-    音乐 -> 图文，您有一条音乐消息，回复msgxx直接查看。
-    语音 -> 图文，您有一条语音消息，回复msgxx直接查看。
-    视频 -> 图文，您有一条视频消息，回复msgxx直接查看
-
-    "articles": [{
-    "title": u"您已成功绑定微信号！",
-    "description": body,
-    "digest": u'恭喜您已成功绑定微信号，可以获得更优质的消息推送',
-    "url": 'http://original.com/post/1/',
-    "picurl": 'http://somepi.com/som.jpg'}, ]
-    """
-
-    user = User.objects.get(name=openid, name_type=1)
-    if not user.wechat:
-        return u'用户未绑定微信号'
-    account = user.wechat
+def send_message_via_account(account, msg_type, content):
     if msg_type == 'text':
-        content = text_to_article(content, msg_id, channel)
+        content = text_to_article(content)
+    elif msg_type == 'news':
+        data = {'touser': account, 'news': {'articles': content}}
     else:
-        content = msg_to_article(content, msg_type, msg_id, channel)
-    data = {'touser': account, 'news': {'articles': content}}
+        return u'未支持的消息格式'
 
     data = json.dumps(data)
     headers = {'content-type': 'application/json'}
@@ -206,30 +183,10 @@ def send_message_in_preview(openid, msg_type, content,
 common_pic = 'http://techparty.qiniudn.com/images/techparty_bg_512.png'
 
 
-def text_to_article(text, msg_id=None, channel=None):
+def text_to_article(text):
     """文本转换成图文, 点击查看详情就可以。
     """
-    return [{'title': u'来自【%s】的新消息' % channel,
+    return [{'title': u'你有新消息',
              'description': u'<pre>%s</pre>' % text,
              'digest': text[:100],
-             'picurl': common_pic}]
-
-
-def msg_to_article(msg, msg_type, msg_id=None, channel=None):
-    """点击
-    """
-    type_name = {'image': u'一张图片',
-                 'music': u'一首音乐',
-                 'voice': u'一段语音',
-                 'video': u'一段视频',
-                 'article': u'一条图文消息'
-                 }[msg_type]
-    title = u'您收到%s' % type_name
-    desc = title
-    if msg_id:
-        desc = u'您收到%s, 回复msg%s查看' % (type_name, msg_id)
-
-    return [{'title': u'%s【%s】' % (title, channel),
-             'description': desc,
-             'digest': desc,
              'picurl': common_pic}]
