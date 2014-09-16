@@ -7,5 +7,5 @@ from django.conf import settings
 class AsyncEmailBackend(BaseEmailBackend):
 
     def send_messages(self, email_messages):
-        from techparty.wechat.tasks import tasks
+        from techparty.wechat import tasks
         tasks.send_messages.delay(email_messages)
