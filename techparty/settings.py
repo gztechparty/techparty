@@ -224,9 +224,18 @@ CACHES = {
     }
 }
 
-
 WECHAT_APP_KEY = ''
 WECHAT_APP_SECRET = ''
+
+# EMAIL SETTINGS
+
+EMAIL_BACKEND = 'techparty.email.AsyncEmailBackend'
+DEFAULT_FROM_EMAIL = 'notice-bot@techparty.org'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'theemial'
+EMAIL_HOST_PASSWORD = 'thepassword'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
 
 try:
     from xsettings import *

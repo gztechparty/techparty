@@ -2,6 +2,7 @@
 
 from social.apps.django_app.default.models import UserSocialAuth
 from techparty.celery import app
+from django.core.mail.backends.smtp import EmailBackend
 
 
 @app.task(name='validate_wechat_account', ignore_result=True)
@@ -38,3 +39,10 @@ def dispatch_message(user, msg_type, content,
     from . utils import _dispatch_message
     _dispatch_message(user, msg_type, content,
                       msg_id, channel)
+
+@task(name='send_messages', ignore_result=True)
+def send_messages(email_messages):
+    """创建一个Django的SMTP Email发送器，在队列中发送。
+    """
+    backend = EmailBackend()
+    backend.send_messages(email_messages)

@@ -14,3 +14,10 @@ class SAEEmailBackend(BaseEmailBackend):
                        settings.EMAIL_HOST_USER,
                        settings.EMAIL_HOST_PASSWORD,
                        settings.EMAIL_USE_TLS))
+
+
+class AsyncEmailBackend(BaseEmailBackend):
+
+    def send_messages(self, email_messages):
+        from techparty.wechat.tasks import tasks
+        tasks.send_messages.delay(email_messages)
