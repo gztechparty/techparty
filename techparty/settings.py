@@ -214,7 +214,8 @@ CELERY_BROKER = 'redis://:%s@%s:%d/%d' % (REDIS_PASSWORD, REDIS_HOST,
 CACHES = {
     'default': {
         'BACKEND': 'redis_cache.cache.RedisCache',
-        'LOCATION': ':'.join((REDIS_HOST, REDIS_PORT, REDIS_DATABASE))
+        'LOCATION': ':'.join((REDIS_HOST, str(REDIS_PORT),
+                              str(REDIS_DATABASE))),
         'OPTIONS': {
             'CLIENT_CLASS': 'redis_cache.client.DefaultClient',
             'PASSWORD': REDIS_PASSWORD,

@@ -7,6 +7,7 @@ from techparty.event.models import Participate
 from datetime import datetime
 from wechat.official import WxTextResponse
 from django.db import IntegrityError
+from django.db.models import Q
 from django.core.validators import validate_email
 from django.core.validators import MaxLengthValidator
 from django.core.validators import URLValidator
@@ -43,8 +44,8 @@ class RegisterEvent(BaseStateMachine):
     }
 
     def init_context(self):
-        print self.user.first_name
-        events = Event.objects.filter(start_time__gt=datetime.now())
+        events = Event.objects.filter(Q(can_signup_before__gt=datetime.now()) |
+                                      Q(start_time__gt=datetime.now()))
         return {'events': [e.to_dict() for e in events],
                 'has_info': self.user.first_name or self.user.email}
 

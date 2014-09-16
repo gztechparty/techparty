@@ -18,6 +18,8 @@ class Event(models.Model):
     tags = TagField(u'标签')
     start_time = models.DateTimeField(u'开始时间')
     end_time = models.DateTimeField(u'结束时间')
+    can_signup_before = models.DateTimeField(u'报名截止时间',
+                                             blank=True, null=True)
     sponsor = models.ForeignKey(settings.AUTH_USER_MODEL,
                                 verbose_name=u'发起人',
                                 blank=True, null=True)

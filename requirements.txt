@@ -22,4 +22,4 @@ pytz
 gevent
 django-celery
 django-redis
-wechat
+mock

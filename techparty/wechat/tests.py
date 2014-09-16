@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.test import Client
 from django.conf import settings
 from django.utils import timezone
+from django.core.cache import cache
 
 from techparty.event.models import Event
 from techparty.event.models import Participate
@@ -17,6 +18,7 @@ import time
 import random
 from lxml import objectify
 import pytz
+from mock import Mock
 
 
 def make_user(name='test_user'):
@@ -44,6 +46,10 @@ def make_event(name='Test Event'):
 class WechatTestCase(TestCase):
     """微信测试用例
     """
+
+    def setUp(self):
+        cache.get = Mock(return_value=None)
+        cache.set = Mock()
 
     def send_text(self, text, user='test_user',
                   command=None, state=None, context=None):
