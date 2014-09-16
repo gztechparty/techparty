@@ -23,3 +23,5 @@ gevent
 django-celery
 django-redis
 mock
+pillow
+qrcode

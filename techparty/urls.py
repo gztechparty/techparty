@@ -6,6 +6,8 @@ from techparty.wechat.views import TechpartyView
 from django.contrib import admin
 admin.autodiscover()
 
+handler500 = 'techparty.website.views.handler500'
+
 urlpatterns = \
     patterns('',
                   url(r'^$', 'techparty.website.views.home'),

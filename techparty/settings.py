@@ -24,7 +24,7 @@ DATABASES = {
 }
 
 ALLOWED_HOSTS = ['2.techparty.sinaapp.com', 'techparty.sinaapp.com',
-                 'techparty.org', 'techparty.sutui.me']
+                 'techparty.org', 'techparty.sutui.me', 'localhost']
 
 
 # Local time zone for this installation. Choices can be found here:
@@ -71,8 +71,6 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "static"),
-
     #"/base/gump_project/techparty/gztechparty/techparty/static",
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
@@ -94,7 +92,6 @@ SECRET_KEY = 'z&amp;0r%^c_=-%+m-sw4qgdr5)mlc=t&amp;dz@@9^$yk^z(2hn6okica'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-    #     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -236,6 +233,13 @@ EMAIL_HOST_USER = 'theemial'
 EMAIL_HOST_PASSWORD = 'thepassword'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
+# SUTUI settings
+
+SUTUI_APP_KEY = ''
+SUTUI_SECRET_KEY = ''
+SUTUI_ERROR_CHANNEL_ID = 24
+SUTUI_INFO_CHANNEL_ID = 11
 
 try:
     from xsettings import *

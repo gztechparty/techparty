@@ -1,0 +1,15 @@
+<html>
+<head>
+  <title>Server Error!</title>
+</head>
+<h1>Server  Error!</h1>
+<h2>{{exception_value}}</h2>
+<body>
+<pre>
+{%for line in traceback %}
+{{line}}
+{%endfor%}
+
+</pre>
+</body>
+</html>

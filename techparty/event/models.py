@@ -81,6 +81,8 @@ class Participate(models.Model):
     pay_amount = models.IntegerField(u'费用', default=0)
     confirm_key = models.CharField(max_length=50, blank=True, null=True,
                                    editable=False)
+    checkin_key = models.CharField(max_length=50, blank=True, null=True,
+                                   editable=False)
     focus_on = models.CharField(u'分享主题', max_length=128,
                                 blank=True, null=True)
     topic = models.CharField(u'分享主题', max_length=128,

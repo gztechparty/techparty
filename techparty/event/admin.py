@@ -30,12 +30,12 @@ class EventAdmin(admin.ModelAdmin):
 class ParticipateAdmin(admin.ModelAdmin):
 
     def invite_user(modeladmin, request, queryset):
+        from techparty.wechat import tasks
         qs = queryset.filter(status__in=(0, 2))
         for pt in qs:
             pt.confirm_key = uuid4().get_hex()
-            send_mail(u'珠三角技术沙龙活动邀请', invite_msg(pt),
-                      'techparty.org@gmail.com',
-                      [pt.user.email], fail_silently=False)
+            pt.checkin_key = uuid4().get_hex()
+            tasks.invite_user.delay(pt, invite_msg(pt))
             pt.status = 1
             pt.save()
 
@@ -80,7 +80,9 @@ INVITE_MSG = """{{user.first_name}}您好：
     活动费用：{{event.fee}}元/人, 主要用于缴纳场地租用及当天茶点费用。
 
 请点击下面的链接确认前往参加活动，或向珠三角技术沙龙微信公众号发送rc命令进行报名的确认。感谢您的配合。
-点击这里确认报名：http://2.techparty.sinaapp.com/reg_confirm/{{event.id}}/{{participate.confirm_key}}/?m={{user.email}}&i={{user.username}}
+点击这里确认报名：http://techparty.sutui.me/reg_confirm/{{event.id}}/{{participate.confirm_key}}/?m={{user.email}}&i={{user.username}}
+
+附件是活动现场签到用的二维码，入场时请向负责签到的组委出示该二维码。
 
 ------------------
 祝一切好！
