@@ -1,7 +1,7 @@
 #encoding=utf-8
 
 from datetime import datetime
-from django.contrib.auth.models import User
+from techparty.member.models import User
 from django.http import HttpResponse
 from django.template import loader
 from django.template import Context
