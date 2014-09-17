@@ -178,18 +178,18 @@ def check_in(request, checkin_key):
     """组委通过扫二维码实现签到
     """
     if not request.user.is_staff:
-        return render('website/checkin_fail.html',
+        return render(request, 'website/checkin_fail.html',
                       {'message': u'只有沙龙组委才有权限访问该页面'})
     try:
         pt = Participate.objects.get(checkin_key=checkin_key)
     except Participate.DoesNotExist:
-        return render('website/checkin_fail.html',
+        return render(request, 'website/checkin_fail.html',
                       {'message': u'无效或伪造的签到二维码'})
     if datetime.now() > pt.event.end_time:
-        return render('website/checkin_fail.html',
+        return render(request, 'website/checkin_fail.html',
                       {'message': u'二维码失效，签到时间已过或活动已结束'})
     pt.checkin_time = datetime.now()
     pt.receptionist = request.user.first_name
     pt.save()
 
-    return render('website/checkin_info.html', {'user': pt.user})
+    return render(request, 'website/checkin_info.html', {'user': pt.user})
