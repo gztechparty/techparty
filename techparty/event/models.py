@@ -83,10 +83,10 @@ class Participate(models.Model):
                                    editable=False)
     checkin_key = models.CharField(max_length=50, blank=True, null=True,
                                    editable=False)
-    focus_on = models.CharField(u'分享主题', max_length=128,
-                                blank=True, null=True)
     topic = models.CharField(u'分享主题', max_length=128,
                              blank=True, null=True)
+    receptionist = models.CharField(u'', max_length=50,
+                                    blank=True, null=True)
 
     def __unicode__(self):
         return u'%s@%s' % (self.user.first_name, self.event.name)

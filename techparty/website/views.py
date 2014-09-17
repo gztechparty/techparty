@@ -3,16 +3,23 @@
 from datetime import datetime
 from techparty.member.models import User
 from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 from django.template import loader
 from django.template import Context
 from django.http import HttpResponseServerError
 from django.shortcuts import render
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate
+from django.contrib.auth import login as _login
+
 from techparty.event.models import Participate, Event
+from . import utils
 import logging
 import sys
 import traceback
 from sutui import Sutui
+
 logger = logging.getLogger("django")
 
 sutui_cli = Sutui(settings.SUTUI_APP_KEY, settings.SUTUI_SECRET_KEY)
@@ -67,8 +74,37 @@ def handler500(request):
     })))
 
 
+def login(request):
+
+    def render_login_form(error=None):
+        if utils.from_mobile(request):
+            return render(request, 'website/login_mobile.html',
+                          {'next': request.REQUEST.get('next', ''),
+                           'error': error})
+        else:
+            return render(request, 'website/login.html',
+                          {'next': request.REQUEST.get('next', ''),
+                           'error': error})
+
+    if request.method == 'GET':
+        return render_login_form()
+    elif request.method == 'POST':
+        name = request.POST.get('name', '')
+        password = request.POST.get('password', '')
+        if '' in (name, password):
+            return render_login_form(u'用户名及密码均不能不空')
+        user = authenticate(username=name, password=password)
+        if not user:
+            return render_login_form(u'输入的用户名密码不正确')
+        if not user.is_active:
+            return render_login_form(u'用户已经禁止登录')
+        _login(request, user)
+        return HttpResponseRedirect(request.POST.get('next', '/'))
+
+    return HttpResponse(u'Unsupport Method')
+
+
 def home(request):
-    raise Exception('hey')
     context = {}
     context = nav_menu(request, context)
 
@@ -135,3 +171,25 @@ def nav_menu(request, context):
 
     context["menus"] = menus
     return context
+
+
+@login_required
+def check_in(request, checkin_key):
+    """组委通过扫二维码实现签到
+    """
+    if not request.user.is_staff:
+        return render('website/checkin_fail.html',
+                      {'message': u'只有沙龙组委才有权限访问该页面'})
+    try:
+        pt = Participate.objects.get(checkin_key=checkin_key)
+    except Participate.DoesNotExist:
+        return render('website/checkin_fail.html',
+                      {'message': u'无效或伪造的签到二维码'})
+    if datetime.now() > pt.event.end_time:
+        return render('website/checkin_fail.html',
+                      {'message': u'二维码失效，签到时间已过或活动已结束'})
+    pt.checkin_time = datetime.now()
+    pt.receptionist = request.user.first_name
+    pt.save()
+
+    return render('website/checkin_info.html', {'user': pt.user})

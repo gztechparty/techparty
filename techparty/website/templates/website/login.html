@@ -1,0 +1,25 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <title>登录t@chparty</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	<meta name="format-detection" content="telephone=no">
+	<meta name="viewport" content="width=device-width, user-scalable=no" />
+  </head>
+  <body>
+    <div id="logo"><img src="http://techparty.org/images/logo.png"/></div>
+    <h2>登录</h2>
+    {% if error %}
+    <p> <span>{{error}}</span></p>
+    {% endif %}
+    <form method="POST" action="">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{next}}" />
+      <input type="text" name="name" value="" placeholder="请输入用户名/email"/><br />
+      <input type="password" name="password" value="" placeholder="请输入密码"/><br />
+      <input type="submit" name="action" value="登录" />
+    </form>
+  </body>
+</html>
