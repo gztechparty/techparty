@@ -188,8 +188,13 @@ def check_in(request, checkin_key):
     if datetime.now() > pt.event.end_time:
         return render(request, 'website/checkin_fail.html',
                       {'message': u'二维码失效，签到时间已过或活动已结束'})
+    if pt.status == 4:
+        return render(request, 'website/checkin_fail.html',
+                      {'message': u'该二维码的主人已签到，不能重复使用！'})
+        
     pt.checkin_time = datetime.now()
     pt.receptionist = request.user.first_name
+    pt.status = 4
     pt.save()
 
     return render(request, 'website/checkin_info.html', {'user': pt.user})
