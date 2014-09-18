@@ -380,7 +380,7 @@ class BindWechat(BaseStateMachine):
     def should_enter_end_from_start(self):
         """如果用户已绑定帐号，则直接退出。
         """
-        return 'wechat_account' in self.context
+        return 'wechat' in self.context
 
     def enter_end_from_start(self):
         msg = u'您已经绑定了微信帐号 %s ' % self.user.wechat
