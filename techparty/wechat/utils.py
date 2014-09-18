@@ -12,7 +12,7 @@ import requests
 from redis_cache import get_redis_connection
 from . import tasks
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('django')
 
 wxapi = WxApi(settings.WECHAT_APP_KEY,
               settings.WECHAT_APP_SECRET,
@@ -164,23 +164,18 @@ def send_message_via_account(account, msg_type, content):
         data = {'touser': account, 'news': {'articles': content}}
     else:
         return u'未支持的消息格式'
-
-    data = json.dumps(data)
-    headers = {'content-type': 'application/json'}
-    url = 'http://wxl.diange.fm/api/cgi-bin/message/pictextpreview/'
-    params = {'access_token': TokenRefresher.refresh_wechat_token()}
-    rsp = requests.post(url, params=params, data=data, headers=headers)
-    if rsp.status_code != 200:
-        log.error(u'发送预览出错了 %s' % rsp.text)
+    rsp, error = wxapi._post('message/pictextpreview', data)
+    if error:
+        log.error(u'发送图文出错了 %s' % error.message)
         log.error(data)
         return u'未知错误'
-    if rsp.json()['errcode'] != 0:
-        log.error(u'发送预览出错了 %s' % rsp.json())
+    if rsp['errcode'] != 0:
+        log.error(u'发送图文出错了 %s' % rsp)
         log.error(data)
-        return u'错误代码%d' % rsp.json()['errcode']
+        return u'错误代码%d' % rsp['errcode']
 
 
-common_pic = 'http://techparty.qiniudn.com/images/techparty_bg_512.png'
+common_pic = 'http://techparty.qiniudn.com/images/techparty_bg.jpg'
 
 
 def text_to_article(text):

@@ -18,9 +18,9 @@ def validate_wechat_account(account, openid):
         "description": body,
         'digest': body,
         "picurl":
-        'http://techparty.qiniudn.com/images/techparty_bg_512.png'
+        'http://techparty.qiniudn.com/images/techparty_bg.jpg'
         }]
-    rsp = send_message_via_account(account, data)
+    rsp = send_message_via_account(account, 'news', data)
     if rsp:
         message = u'验证过程中出了些问题，请稍后再试...'
     else:
