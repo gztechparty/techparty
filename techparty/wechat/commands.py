@@ -383,7 +383,7 @@ class BindWechat(BaseStateMachine):
         return 'wechat' in self.context
 
     def enter_end_from_start(self):
-        msg = u'您已经绑定了微信帐号 %s ' % self.user.wechat
+        msg = u'您已经绑定了微信帐号 %s ' % self.context['wechat']
         return WxTextResponse(msg, self.obj)
 
     def should_enter_end_from_input(self):
