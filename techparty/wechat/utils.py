@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 
 wxapi = WxApi(settings.WECHAT_APP_KEY,
               settings.WECHAT_APP_SECRET,
-              host='http://wxl.diange.fm/api/cgi-bin/')
+              api_entry='http://wxl.diange.fm/api/cgi-bin/')
 
 rds = get_redis_connection('default')
 
