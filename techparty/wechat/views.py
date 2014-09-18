@@ -79,12 +79,8 @@ class TechpartyView(View, WxApplication):
             return HttpResponse(self.process(request.GET))
 
     def post(self, request):
-        try:
-            rsp = self.process(request.GET, request.body)
-            return HttpResponse(rsp)
-        except:
-            log_err()
-            return HttpResponse('error request')
+        rsp = self.process(request.GET, request.body)
+        return HttpResponse(rsp)
 
     def get_actions(self):
         actionMap = {}
@@ -135,7 +131,7 @@ class TechpartyView(View, WxApplication):
             try:
                 state, contextobj, rsp = command.process(
                     text, state, contextobj, user=self.user)
-                
+
             except StateException, e:
                 err = e.error
                 contextobj = e.context

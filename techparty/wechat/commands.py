@@ -362,9 +362,10 @@ class BindWechat(BaseStateMachine):
         # 查询当前用户是否有绑定微信帐号。
         social = UserSocialAuth.objects.filter(provider='weixin',
                                                user=self.user)
-        data = social.extra_data
-        if 'wechat_account' in data:
-            return {'wechat': data['wechat_account']}
+        if social:
+            data = social[0].extra_data
+            if 'wechat_account' in data:
+                return {'wechat': data['wechat_account']}
         return {}
 
     def should_enter_input_from_start(self):
@@ -391,8 +392,8 @@ class BindWechat(BaseStateMachine):
     def enter_end_from_input(self):
         """向用户发送一条预览信息，如果不成功则发送错误信息。
         """
-        #tasks.validate_wechat_account.delay(self.obj.Content,
-        #                                    self.obj.FromUserName)
+        tasks.validate_wechat_account.delay(self.obj.Content,
+                                            self.obj.FromUserName)
         return WxTextResponse(u'正在验证您的微信号，请稍候 ...', self.obj)
 
 register_cmd(RegisterEvent)
@@ -439,10 +440,12 @@ def register_events(wxreq, user):
                                      pt.get_status())
                 ct = ct + u'您已经报名参加了 %s\n' % names
             else:
-                ct = ct + u'%s,您己受邀请参加下面的活动，届时请准时出席！\n' % user.first_name
+                ct = ct + u'%s,您己受邀请参加下面的活动，届时请准时出席！\n' % \
+                    user.first_name
                 event = pt.event
-                ct = ct + u"""活动:%s\n地址：%s\n时间：%s\n场地人均消费：%d元\n""" % (event.name, event.address,
-                                        event.start_time, event.fee)
+                ct = ct + u"""活动:%s\n地址：%s\n时间：%s\n场地人均消费：%d元\n""" % \
+                    (event.name, event.address,
+                     event.start_time, event.fee)
     else:
         ct = u'您目前未报名任何活动'
     return WxTextResponse(ct, wxreq)
