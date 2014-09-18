@@ -168,11 +168,11 @@ def send_message_via_account(account, msg_type, content):
     if error:
         log.error(u'发送图文出错了 %s' % error.message)
         log.error(data)
-        return u'未知错误'
+        return error
     if rsp['errcode'] != 0:
         log.error(u'发送图文出错了 %s' % rsp)
         log.error(data)
-        return u'错误代码%d' % rsp['errcode']
+        return u'验证过程中出了些问题，请稍后再试...'
 
 
 common_pic = 'http://techparty.qiniudn.com/images/techparty_bg.jpg'

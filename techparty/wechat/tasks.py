@@ -24,14 +24,9 @@ def validate_wechat_account(account, openid):
     if rsp:
         message = u'验证过程中出了些问题，请稍后再试...'
     else:
-        data = rsp.json()
-        if data['errcode'] == 0:
-            social = UserSocialAuth.objects.get(uid=openid, provider='weixin')
-            social.extra_data.update({'wechat_account': account})
-            social.save()
-            return
-        else:
-            message = u'您输入的微信帐号不正确，请重新尝试绑定'
+        social = UserSocialAuth.objects.get(uid=openid, provider='weixin')
+        social.extra_data.update({'wechat_account': account})
+        social.save()
     if message:
         dispatch_message(openid, 'text', message)
 
