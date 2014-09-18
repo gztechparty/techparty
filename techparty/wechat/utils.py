@@ -168,7 +168,9 @@ def send_message_via_account(account, msg_type, content):
     if error:
         log.error(u'发送图文出错了 %s' % error.message)
         log.error(data)
-        return error
+        if error == 'check friend failed!':
+            return u'输入的微信号有误，请重新输入bd进行绑定。'
+        return u'验证过程中出了些问题，请稍后再试...'
     if rsp['errcode'] != 0:
         log.error(u'发送图文出错了 %s' % rsp)
         log.error(data)

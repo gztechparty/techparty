@@ -22,7 +22,7 @@ def validate_wechat_account(account, openid):
         }]
     rsp = send_message_via_account(account, 'news', data)
     if rsp:
-        message = u'验证过程中出了些问题，请稍后再试...'
+        message = rsp
     else:
         social = UserSocialAuth.objects.get(uid=openid, provider='weixin')
         social.extra_data.update({'wechat_account': account})
