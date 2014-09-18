@@ -132,7 +132,7 @@ def _dispatch_message(user, msg_type, content,
                 log.error(content)
                 if err.code in (40001, 42001, 40014):
                     log.info('error token, flush it!')
-                    cache.delete('sutui_wx_access_token')
+                    cache.delete(ACCESS_TOKEN_CACHE_KEY)
                     token = TokenRefresher.refresh_wechat_token()
                     wxapi._access_token = token
                 elif err.code == 45015:
