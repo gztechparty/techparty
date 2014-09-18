@@ -21,6 +21,7 @@ def validate_wechat_account(account, openid):
         'http://techparty.qiniudn.com/images/techparty_bg.jpg'
         }]
     rsp = send_message_via_account(account, 'news', data)
+    message = None
     if rsp:
         message = rsp
     else:

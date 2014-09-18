@@ -369,7 +369,7 @@ class BindWechat(BaseStateMachine):
         return {}
 
     def should_enter_input_from_start(self):
-        return 'wechat_account' not in self.context
+        return 'wechat' not in self.context
 
     def enter_input_from_start(self):
         return WxTextResponse(u'请输入您的微信号，回复0取消', self.obj)
