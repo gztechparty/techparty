@@ -12,6 +12,10 @@ import qrcode
 import qiniu.rs
 import qiniu.io
 
+import logging
+
+log = logging.getLogger('django')
+
 
 @app.task(name='validate_wechat_account', ignore_result=True)
 def validate_wechat_account(account, openid):
@@ -73,9 +77,11 @@ def invite_user(participate, message):
         social = UserSocialAuth.objects.get(provider='weixin',
                                             user=participate.user)
     except:
+        log.warn(u'找不到当前用户的微信帐号')
         return
 
     if 'wechat_account' not in social.extra_data:
+        log.warn(u'用户没绑定微信号')
         return
 
     # 上传至七牛
@@ -86,6 +92,7 @@ def invite_user(participate, message):
     key = 'qr/%d/%s.png' % (participate.event.id, participate.checkin_key)
     _, err = qiniu.io.put_file(uptoken, key, tmp_path)
     if err:
+        log.warn(u'上传到七牛有错误 %s' % err)
         return
     tpl = Template(settings.INVITE_MSG_WECHAT)
     message = tpl.render(Context({'user': participate.user,
