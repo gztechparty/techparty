@@ -83,7 +83,7 @@ class MyUserAdmin(UserAdmin):
             'fields': ('username', 'password1', 'password2')}
          ),
     )
-    search_fields = ('username', 'first_name')
+    search_fields = ('username', 'first_name', 'email')
     ordering = ('username', )
     filter_horizontal = ()
 

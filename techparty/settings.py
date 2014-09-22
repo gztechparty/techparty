@@ -1,6 +1,7 @@
 #encoding=utf-8
 
 import os
+import qiniu.conf
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -240,6 +241,57 @@ SUTUI_APP_KEY = ''
 SUTUI_SECRET_KEY = ''
 SUTUI_ERROR_CHANNEL_ID = 24
 SUTUI_INFO_CHANNEL_ID = 11
+
+# QINIU settings
+
+qiniu.conf.ACCESS_KEY = "<YOUR_APP_ACCESS_KEY>"
+qiniu.conf.SECRET_KEY = "<YOUR_APP_SECRET_KEY>"
+
+INVITE_MSG = """{{user.first_name}}您好：
+    您在珠三角技术沙龙的活动“{{event.name}}”中的报名申请已被接受了，现正式通知您。下面是本次活动的详细情况:
+
+    活动名称：{{event.name}}
+    举办时间：{{event.start_time}} 至 {{event.end_time}}
+    举办地址：{{event.address}}
+    活动费用：{{event.fee}}元/人, 主要用于缴纳场地租用及当天茶点费用。
+
+请点击下面的链接确认前往参加活动，或向珠三角技术沙龙微信公众号发送rc命令进行报名的确认。感谢您的配合。
+点击这里确认报名：http://techparty.sutui.me/reg_confirm/{{event.id}}/{{participate.confirm_key}}/?m={{user.email}}&i={{user.username}}
+
+附件是活动现场签到用的二维码，入场时请向负责签到的组委出示该二维码。
+
+------------------
+祝一切好！
+@珠三角技术沙龙 组委
+http://techparty.org
+"""
+
+INVITE_MSG_WECHAT = """{{user.first_name}}您好：
+    您在珠三角技术沙龙的活动“{{event.name}}”中的报名申请已被接受了，现正式通知您。下面是本次活动的详细情况:
+
+    活动名称：{{event.name}}
+    举办时间：{{event.start_time}} 至 {{event.end_time}}
+    举办地址：{{event.address}}
+    活动费用：{{event.fee}}元/人, 主要用于缴纳场地租用及当天茶点费用。
+
+以下是活动现场签到用的二维码，请妥善保存该二维码，入场时请向负责签到的组委出示它。
+
+<img src="http://techparty.qiniudn.com/rs/{{event.id}}/{{participate.checkin_key}}.png"/>
+
+------------------
+祝一切好！
+@珠三角技术沙龙 组委
+http://techparty.org
+"""
+
+REJECT_MSG = """{{user.first_name}}您好：
+    很遗憾地通知您，您在珠三角技术沙龙活动“{{event.name}}“中的报名没能通过。
+    欢迎继续关注珠三角技术沙龙的其他活动。谢谢。
+------------------
+祝一切好！
+@珠三角技术沙龙 组委
+http://techparty.org
+"""
 
 try:
     from xsettings import *
