@@ -269,13 +269,12 @@ http://techparty.org
 INVITE_MSG_WECHAT = """<p>{{user.first_name}}您好：</p>
     <p>您在珠三角技术沙龙的活动“{{event.name}}”中的报名申请已被接受了，现正式通知您。下面是本次活动的详细情况:</p>
 <ul>
-    <li>活动名称：{{event.name}}</li>
-    <li>举办时间：{{event.start_time}} 至 {{event.end_time}}</li>
-    <li>举办地址：{{event.address}}</li>
-    <li>活动费用：{{event.fee}}元/人, 主要用于缴纳场地租用及当天茶点费用。</li>
+    <li><b>活动名称</b>：{{event.name}}</li>
+    <li><b>举办时间</b>：{{event.start_time}} 至 {{event.end_time}}</li>
+    <li><b>举办地址</b>：{{event.address}}</li>
+    <li><b>活动费用</b>：{{event.fee}}元/人, 主要用于缴纳场地租用及当天茶点费用。</li>
 </ul>
 <p>以下是活动现场签到用的二维码，请妥善保存该二维码，入场时请向负责签到的组委出示它。<p>
-
 <img src="http://techparty.qiniudn.com/qr/{{event.id}}/{{participate.checkin_key}}.png"/>
 """
 
