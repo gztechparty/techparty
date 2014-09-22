@@ -266,22 +266,17 @@ INVITE_MSG = """{{user.first_name}}您好：
 http://techparty.org
 """
 
-INVITE_MSG_WECHAT = """{{user.first_name}}您好：
-    您在珠三角技术沙龙的活动“{{event.name}}”中的报名申请已被接受了，现正式通知您。下面是本次活动的详细情况:
+INVITE_MSG_WECHAT = """<p>{{user.first_name}}您好：</p>
+    <p>您在珠三角技术沙龙的活动“{{event.name}}”中的报名申请已被接受了，现正式通知您。下面是本次活动的详细情况:</p>
+<ul>
+    <li>活动名称：{{event.name}}</li>
+    <li>举办时间：{{event.start_time}} 至 {{event.end_time}}</li>
+    <li>举办地址：{{event.address}}</li>
+    <li>活动费用：{{event.fee}}元/人, 主要用于缴纳场地租用及当天茶点费用。</li>
+</ul>
+<p>以下是活动现场签到用的二维码，请妥善保存该二维码，入场时请向负责签到的组委出示它。<p>
 
-    活动名称：{{event.name}}
-    举办时间：{{event.start_time}} 至 {{event.end_time}}
-    举办地址：{{event.address}}
-    活动费用：{{event.fee}}元/人, 主要用于缴纳场地租用及当天茶点费用。
-
-以下是活动现场签到用的二维码，请妥善保存该二维码，入场时请向负责签到的组委出示它。
-
-<img src="http://techparty.qiniudn.com/rs/{{event.id}}/{{participate.checkin_key}}.png"/>
-
-------------------
-祝一切好！
-@珠三角技术沙龙 组委
-http://techparty.org
+<img src="http://techparty.qiniudn.com/qr/{{event.id}}/{{participate.checkin_key}}.png"/>
 """
 
 REJECT_MSG = """{{user.first_name}}您好：
