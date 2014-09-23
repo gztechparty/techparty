@@ -413,7 +413,7 @@ class ModifyPasswordTestCase(WechatTestCase):
         self.assertEqual('end', obj.WechatlibState)
 
     def test_cancel(self):
-        """
+        """用户取消修改密码
         """
         user = make_user('test_user')
         social = UserSocialAuth.objects.get(user=user, provider='weixin')
@@ -431,3 +431,20 @@ class ModifyPasswordTestCase(WechatTestCase):
                               state='new',
                               context=obj.WechatlibContext)
         self.assertIn('已取消修改密码', rsp)
+
+    def test_short_password(self):
+        """新密码太短
+        """
+        user = make_user('test_user')
+        user.email = 'jeff'
+        user.save()
+        rsp = self.send_text('passwd', 'test_user')
+        obj = objectify.fromstring(rsp)
+        self.assertIn('请输入新密码', rsp)
+        self.assertEqual('new', obj.WechatlibState)
+
+        rsp = self.send_text('pa', 'test_user', command='passwd',
+                             state='new',
+                             context=obj.WechatlibContext)
+        self.assertIn('密码需要6位或以上字母、数字，请重新输入：', rsp)
+        self.assertEqual('new', obj.WechatlibState)

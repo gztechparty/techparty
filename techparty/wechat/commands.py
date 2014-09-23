@@ -400,7 +400,7 @@ class BindWechat(BaseStateMachine):
 class ModifyPassword(BaseStateMachine):
 
     COMMAND_NAME = u'修改密码'
-    COMMAND_ALIAS = u'passwd,pass'
+    COMMAND_ALIAS = u'passwd,pass,password'
 
     TRANSIT_MAP = {
         'start': (('end', {}), ('old', {}), ('new', {})),
@@ -459,7 +459,7 @@ class ModifyPassword(BaseStateMachine):
         # 密码长度大6即可。
         password = self.obj.Content.strip()
         if len(password) < 6:
-            self.error = u'密码长度需要6位及以上字母、数字，请重新输入：'
+            self.error = u'密码需要6位或以上字母、数字，请重新输入：'
             return False
         self.user.set_password(password)
         return True
