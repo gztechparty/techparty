@@ -396,10 +396,93 @@ class BindWechat(BaseStateMachine):
                                             self.obj.FromUserName)
         return WxTextResponse(u'正在验证您的微信号，请稍候 ...', self.obj)
 
+
+class ModifyPassword(BaseStateMachine):
+
+    COMMAND_NAME = u'修改密码'
+    COMMAND_ALIAS = u'passwd,pass'
+
+    TRANSIT_MAP = {
+        'start': (('end', {}), ('old', {}), ('new', {})),
+        'old': (('end', {}), ('new', {}), ('cancel', {'Content': '0'}),
+                ('new', {})),
+        'new': (('cancel', {'Content': '0'}), ('end', {}))
+    }
+
+    def init_context(self):
+        social = UserSocialAuth.objects.filter(provider='weixin',
+                                               user=self.user)
+        if social and 'wechat_account' in social[0].extra_data:
+            social = social[0].extra_data['wechat_account']
+        else:
+            social = None
+
+        return {'can_modify': self.user.email or social}
+
+    def should_enter_end_from_start(self):
+        return not self.context['can_modify']
+
+    def should_enter_old_from_start(self):
+        return self.context['can_modify'] and self.user.has_usable_password()
+
+    def should_enter_new_from_start(self):
+        return self.context['can_modify'] and not \
+            self.user.has_usable_password()
+
+    def enter_old_from_start(self):
+        tips = (u'温馨提示：修改密码将需要你在微信上输入原密码信息,'
+                u'为保证您的帐号安全，请在完成修改后删除相关的聊天信息！\n'
+                u'请输入旧密码：')
+        return WxTextResponse(tips, self.obj)
+
+    def should_enter_end_from_old(self):
+        # 输入三次均错误，则返回True
+        if self.user.check_password(self.obj.Content):
+            return False
+        et = self.context.get('error_times', 0)
+        self.context['error_times'] = et + 1
+        if self.context['error_times'] >= 3:
+            return True
+        else:
+            return False
+
+    def should_enter_new_from_old(self):
+        if self.user.check_password(self.obj.Content):
+            return True
+        self.error = u'输入的密码错误，请重新输入:'
+        return False
+
+    def enter_new_state(self):
+        return WxTextResponse(u'请输入新密码：', self.obj)
+
+    def should_enter_end_from_new(self):
+        # 密码长度大6即可。
+        password = self.obj.Content.strip()
+        if len(password) < 6:
+            self.error = u'密码长度需要6位及以上字母、数字，请重新输入：'
+            return False
+        self.user.set_password(password)
+        return True
+
+    def enter_end_from_old(self):
+        return WxTextResponse(u'输入错误密码超过三次，已取消修改密码。', self.obj)
+
+    def enter_end_from_start(self):
+        return WxTextResponse((u'您没有绑定微信号或设置个人email信息，'
+                               u'请先回复【bd】绑定微信号或【ei】修改个人资料'), self.obj)
+
+    def enter_end_from_new(self):
+        return WxTextResponse(
+            u'已成功修改密码，为安全起见，请删除上面的聊天纪录 :)', self.obj)
+
+    def cancel(self):
+        return WxTextResponse(u'已取消修改密码', self.obj)
+
 register_cmd(RegisterEvent)
 register_cmd(RegisterConfirm)
 register_cmd(ProfileEdit)
 register_cmd(BindWechat)
+register_cmd(ModifyPassword)
 
 
 ############## simple command ############

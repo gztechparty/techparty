@@ -274,6 +274,7 @@ INVITE_MSG_WECHAT = """<p>{{user.first_name}}您好：</p>
     <li><b>举办地址</b>：{{event.address}}</li>
     <li><b>活动费用</b>：{{event.fee}}元/人, 主要用于缴纳场地租用及当天茶点费用。</li>
 </ul>
+<p>请在公众号内回复【rc】二字告诉我们您确定会来到活动现场哦。</p>
 <p>以下是活动现场签到用的二维码，请妥善保存该二维码，入场时请向负责签到的组委出示它。<p>
 <img src="http://techparty.qiniudn.com/qr/{{event.id}}/{{participate.checkin_key}}.png"/>
 """

@@ -131,7 +131,7 @@ class TechpartyView(View, WxApplication):
             try:
                 state, contextobj, rsp = command.process(
                     text, state, contextobj, user=self.user)
-
+    
             except StateException, e:
                 err = e.error
                 contextobj = e.context

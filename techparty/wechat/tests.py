@@ -328,3 +328,106 @@ class ProfileEditTestCase(WechatTestCase):
         rsp = self.send_text('c', 'test_user', command='ei', state='edit',
                              context=obj.WechatlibContext)
         self.assertIn('已取消更改个人资料', rsp)
+
+
+class ModifyPasswordTestCase(WechatTestCase):
+    
+    def test_no_old_password(self):
+        user = make_user('test_user')
+        user.email = 'jeff@techparty.org'
+        user.save()
+        rsp = self.send_text('passwd', 'test_user')
+        obj = objectify.fromstring(rsp)
+        self.assertIn('请输入新密码', rsp)
+        self.assertEqual('new', obj.WechatlibState)
+
+        rsp = self.send_text('123456', 'test_user', command='passwd',
+                             state='new',
+                             context=obj.WechatlibContext)
+        self.assertIn('已成功修改密码', rsp)
+        obj = objectify.fromstring(rsp)
+        self.assertEqual('end', obj.WechatlibState)
+        
+
+    def test_old_password(self):
+        user = make_user('test_user')
+        user.email = 'jeff@techparty.org'
+        user.set_password('password')
+        user.save()
+        rsp = self.send_text('passwd', 'test_user')
+        obj = objectify.fromstring(rsp)
+        self.assertIn('请输入旧密码', rsp)
+        self.assertEqual('old', obj.WechatlibState)
+
+        rsp = self.send_text('password', 'test_user', command='passwd',
+                             state='old',
+                             context=obj.WechatlibContext)
+        obj = objectify.fromstring(rsp)
+        self.assertIn('请输入新密码', rsp)
+        self.assertEqual('new', obj.WechatlibState)
+        rsp = self.send_text('123456', 'test_user', command='passwd',
+                             state='new',
+                             context=obj.WechatlibContext)
+        self.assertIn('已成功修改密码', rsp)
+        obj = objectify.fromstring(rsp)
+        self.assertEqual('end', obj.WechatlibState)
+
+    def test_old_password_wrong(self):
+        user = make_user('test_user')
+        user.email = 'jeff@techparty.org'
+        user.set_password('password')
+        user.save()
+        rsp = self.send_text('passwd', 'test_user')
+        obj = objectify.fromstring(rsp)
+        self.assertIn('请输入旧密码', rsp)
+        self.assertEqual('old', obj.WechatlibState)
+
+        rsp = self.send_text('pass', 'test_user', command='passwd',
+                             state='old',
+                             context=obj.WechatlibContext)
+        obj = objectify.fromstring(rsp)
+        self.assertIn('输入的密码错误，请重新输入', rsp)
+        self.assertEqual('old', obj.WechatlibState)
+
+        rsp = self.send_text('pass', 'test_user', command='passwd',
+                             state='old',
+                             context=obj.WechatlibContext)
+        obj = objectify.fromstring(rsp)
+        self.assertIn('输入的密码错误，请重新输入', rsp)
+        self.assertEqual('old', obj.WechatlibState)
+
+        rsp = self.send_text('pass', 'test_user', command='passwd',
+                             state='old',
+                             context=obj.WechatlibContext)
+        obj = objectify.fromstring(rsp)
+        self.assertIn('输入错误密码超过三次', rsp)
+        self.assertEqual('end', obj.WechatlibState)
+
+    def test_no_more_profile(self):
+        """无登录用的用户信息，要求用户先丰富个人资料
+        """
+        user = make_user('test_user')
+        rsp = self.send_text('passwd', 'test_user')
+        obj = objectify.fromstring(rsp)
+        self.assertIn('您没有绑定微信号或设置', rsp)
+        self.assertEqual('end', obj.WechatlibState)
+
+    def test_cancel(self):
+        """
+        """
+        user = make_user('test_user')
+        social = UserSocialAuth.objects.get(user=user, provider='weixin')
+        data = social.extra_data
+        data['wechat_account'] = 'jeff'
+        social.extra_data = data
+        social.save()
+        
+        rsp = self.send_text('passwd', 'test_user')
+        obj = objectify.fromstring(rsp)
+        self.assertIn('请输入新密码', rsp)
+        self.assertEqual('new', obj.WechatlibState)
+
+        rsp = self.send_text('0', 'test_user', command='passwd',
+                              state='new',
+                              context=obj.WechatlibContext)
+        self.assertIn('已取消修改密码', rsp)

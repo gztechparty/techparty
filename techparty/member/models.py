@@ -26,7 +26,7 @@ class MemberManager(BaseUserManager):
 
     def create_random_user(self):
         return self.create_user(uuid4().get_hex(),
-                                self.make_random_password())
+                                None)
 
     def create_superuser(self, username,
                          password):
