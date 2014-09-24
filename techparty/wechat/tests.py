@@ -29,6 +29,7 @@ def make_user(name='test_user'):
         
     social = UserSocialAuth(user=user, provider='weixin',
                             uid=name)
+    social.extra_data = {'wechat_account': 'jeff'}
     social.save()
     return user
 
@@ -105,7 +106,7 @@ class RegisterTestCase(WechatTestCase):
         """
         rsp = self.send_text('er')
         print rsp
-        self.assertIn('您的个人资料不齐，请回复ei补全再报名', rsp)
+        self.assertIn('您还没有绑定微信号，请回复【bd】绑定微信号', rsp)
 
     def test_one_event(self):
         """只有一个活动的情况
@@ -410,6 +411,9 @@ class ModifyPasswordTestCase(WechatTestCase):
         """无登录用的用户信息，要求用户先丰富个人资料
         """
         user = make_user('test_user')
+        social = user.social_auth.get(provider='weixin')
+        social.extra_data = {}
+        social.save()
         rsp = self.send_text('passwd', 'test_user')
         obj = objectify.fromstring(rsp)
         self.assertIn('您没有绑定微信号或设置', rsp)
