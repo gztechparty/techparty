@@ -28,6 +28,7 @@ class TokenRefresher(object):
     token_result = AsyncResult()
     token_lock = BoundedSemaphore(1)
     is_refreshing_token = False
+    got_global_lock = False
 
     @classmethod
     def get_access_token(cls, old_token=None):
@@ -37,17 +38,25 @@ class TokenRefresher(object):
         wxapi._access_token = None
         test = rds.getset(ACCESS_TOKEN_REFRESH_FLAG, '1')
         if not test:
+            cls.got_global_lock = True
             # 可能情况，在getset之前一瞬间，前一个并发进程刚发完成并delete key
             # 所以，在此测试一下token是否已经更新，不做无谓的工夫。
             test_token = cache.get(ACCESS_TOKEN_CACHE_KEY)
             if test_token and test_token != old_token:
                 rds.delete(ACCESS_TOKEN_REFRESH_FLAG)
+                cls.got_global_lock = False
                 return test_token
 
             log.info('you are the one! go get the access token!')
-            token = wxapi.access_token
-            cache.set(ACCESS_TOKEN_CACHE_KEY, token, 7000)
-            rds.delete(ACCESS_TOKEN_REFRESH_FLAG)
+            try:
+                token = wxapi.access_token
+                cache.set(ACCESS_TOKEN_CACHE_KEY, token, 7000)
+            except:
+                token = None
+                log.error(u'error when obtain access_token', exc_info=True)
+            finally:
+                rds.delete(ACCESS_TOKEN_REFRESH_FLAG)
+                cls.got_global_lock = False
             # 通知所有等待中的进程，OK了！
             keys = rds.smembers(TOKEN_CHANNEL_SET)
             for key in keys:
@@ -68,7 +77,9 @@ class TokenRefresher(object):
 
     @classmethod
     def refresh_wechat_token(cls):
-        token = None
+        """同一线程里的所有协程并发执行此函数，同一时间只能有一个协程能获取。
+        """
+        token = cache.get(ACCESS_TOKEN_CACHE_KEY)
         if cls.is_refreshing_token:
             log.info('somebody refreshing token now, wait here')
             token = cls.token_result.get()
@@ -84,9 +95,16 @@ class TokenRefresher(object):
                 cls.token_result = AsyncResult()
                 cls.is_refreshing_token = True
                 cls.token_lock.release()
-                token = cls.get_access_token()
-                cls.token_result.set(token)
-                cls.is_refreshing_token = None
+                try:
+                    token = cls.get_access_token(token)
+                    cls.token_result.set(token)
+                except:
+                    log.error(u'获取access_token出错了', exc_info=True)
+                    if cls.got_global_lock:
+                        rds.delete(ACCESS_TOKEN_REFRESH_FLAG)
+                        cls.got_global_lock = False
+                finally:
+                    cls.is_refreshing_token = None
         return token
 
 
