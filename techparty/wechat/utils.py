@@ -6,9 +6,6 @@ from django.core.cache import cache
 from django.conf import settings
 import logging
 import random
-import sys
-import json
-import requests
 from redis_cache import get_redis_connection
 from . import tasks
 
@@ -93,6 +90,35 @@ class TokenRefresher(object):
         return token
 
 
+def token_guarantee(func):
+    """保证微信接口的调用均能够得到有效的access_token。
+    如果token失败，则重新获取，然后重试一次。
+    """
+
+    def wrapped_func(*args, **kwargs):
+        token = cache.get(ACCESS_TOKEN_CACHE_KEY, None)
+        log.info('token from cache %s' % token)
+        if not token:
+            log.info(u'not token found in the cache, grep it again')
+            token = TokenRefresher.refresh_wechat_token()
+            log.info('new token from wx %s' % token)
+            if not token:
+                log.error('error when get access token')
+                return None
+        log.info('token to be use %s' % token)
+        wxapi._access_token = token
+        data, err = func(*args, **kwargs)
+        if err.code in (40001, 42001, 40014):
+            log.info('error token, flush it!')
+            cache.delete(ACCESS_TOKEN_CACHE_KEY)
+            token = TokenRefresher.refresh_wechat_token()
+            wxapi._access_token = token
+            data, err = func(*args, **kwargs)
+        return data, err
+
+    return wrapped_func
+
+
 def dispatch_message(users, message):
     # 从cache获取access_token
     msg_type = message.msg_type
@@ -109,52 +135,17 @@ def _dispatch_message(user, msg_type, content,
     """把消息发到用户的公众号，是推送的核心。
     """
 
-    log.info('_dispatch_message, channel %s' % channel)
-    token = cache.get(ACCESS_TOKEN_CACHE_KEY, None)
-    log.info('token from cache %s' % token)
-    if not token:
-        log.info(u'not token found in the cache, grep it again')
-        token = TokenRefresher.refresh_wechat_token()
-        log.info('new token from wx %s' % token)
-        if not token:
-            log.error('error when get access token')
-            return 'no access token'
-    log.info('token to be use %s' % token)
-    wxapi._access_token = token
-
-    try:
-        while True:
-            rs, err = wxapi.send_message(user, msg_type, content)
-            log.info('message sent')
-            if err:
-                log.error('send wechat message error, code %d' % err.code)
-                log.error(err.message)
-                log.error(content)
-                if err.code in (40001, 42001, 40014):
-                    log.info('error token, flush it!')
-                    cache.delete(ACCESS_TOKEN_CACHE_KEY)
-                    token = TokenRefresher.refresh_wechat_token()
-                    wxapi._access_token = token
-                elif err.code == 45015:
-                    # 用户48小时内无互动, 通过微信号发送
-                    return send_message_via_account(user, msg_type, content,
-                                                    msg_id, channel)
-                elif err.code == 45002 and msg_type == 'text':
-                    # 超长消息, 通过微信号发送
-                    return send_message_via_account(user, msg_type, content,
-                                                    msg_id, channel)
-                else:
-                    return 'unknow error'
-            else:
-                break
-    except:
-        tp, msg, tb = sys.exc_info()
-        log.error(tp)
-        log.error(msg)
-        import traceback
-        traceback.print_tb(tb)
-        log.error('send message fail')
-        return u'exception occur'
+    rs, err = token_guarantee(wxapi.send_message)(user, msg_type, content)
+    if err.code == 45015:
+        # 用户48小时内无互动, 通过微信号发送
+        return send_message_via_account(user, msg_type, content,
+                                        msg_id, channel)
+    elif err.code == 45002 and msg_type == 'text':
+        # 超长消息, 通过微信号发送
+        return send_message_via_account(user, msg_type, content,
+                                        msg_id, channel)
+    else:
+        return 'unknow error'
 
 
 def send_message_via_account(account, msg_type, content):
@@ -164,7 +155,7 @@ def send_message_via_account(account, msg_type, content):
         data = {'touser': account, 'news': {'articles': content}}
     else:
         return u'未支持的消息格式'
-    rsp, error = wxapi._post('message/pictextpreview', data)
+    rsp, error = token_guarantee(wxapi._post)('message/pictextpreview', data)
     if error:
         log.error(u'发送图文出错了 %s' % error.message)
         log.error(data)
@@ -187,3 +178,7 @@ def text_to_article(text):
              'description': u'<pre>%s</pre>' % text,
              'digest': text[:100],
              'picurl': common_pic}]
+
+
+def get_user_detail(openid):
+    return token_guarantee(wxapi.user_info)(openid)

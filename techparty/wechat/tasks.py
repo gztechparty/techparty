@@ -109,3 +109,39 @@ def invite_user(participate, message):
     from . utils import send_message_via_account
     send_message_via_account(social.extra_data['wechat_account'],
                              'news', data)
+
+
+@app.task(name='get_user_detail', ignore_result=True)
+def get_user_detail(openid):
+    """从微信获取用户的详情
+    """
+    from .utils import get_user_detail
+    social = UserSocialAuth.objects.get(uid=openid, provider='weixin')
+    if not 'nickname' in social:
+        # 从微信获取用户数据。
+        info, err = get_user_detail(openid)
+        if err:
+            log.error('get user detail err %s' % err)
+            log.error('can not get user detail', exc_info=True)
+            return
+        social.extra_data.update(info)
+        social.save()
+
+    # 更新用户的头像和昵称，姓别
+    user = social.user
+    data = social.extra_data
+    change = False
+    if not user.first_name:
+        user.first_name = data['nickname']
+        change = True
+
+    if not user.gendar:
+        user.gendar = data['sex']
+        change = True
+
+    if not user.avatar:
+        user.avatar = data['headimgurl']
+        change = True
+
+    if change:
+        user.save()

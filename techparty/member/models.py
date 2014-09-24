@@ -58,8 +58,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_lecturer = models.BooleanField(u'讲师', default=False)
 
     birth_date = models.DateTimeField(null=True, blank=True)
-    gendar = models.IntegerField(default=1,
-                                 choices=((0, u'女'), (1, u'男')))
+    gendar = models.IntegerField(default=0,
+                                 choices=((2, u'女'), (1, u'男'),
+                                          (0, u'未知')))
     company = models.CharField(u'公司', max_length=100, blank=True, null=True)
     title = models.CharField(u'职位', max_length=50, blank=True, null=True)
 

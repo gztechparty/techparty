@@ -13,6 +13,7 @@ from techparty.wechat.commands import interactive_cmds
 from yafsm import BaseStateMachine, StateException
 import json
 import random
+from . import tasks
 if settings.RUN_ON_SAE:
     import pylibmc
     cache = pylibmc.Client()
@@ -131,7 +132,7 @@ class TechpartyView(View, WxApplication):
             try:
                 state, contextobj, rsp = command.process(
                     text, state, contextobj, user=self.user)
-    
+
             except StateException, e:
                 err = e.error
                 contextobj = e.context
@@ -186,3 +187,7 @@ class TechpartyView(View, WxApplication):
                 social.save()
             except:
                 log_err()
+        # 用户未有更多信息时，异步更新一次。
+        if not self.user.avatar:
+            tasks.get_user_detail.apply_async(args=[self.wxreq.FromUserName],
+                                              countdown=10)
