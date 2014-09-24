@@ -124,12 +124,14 @@ def get_user_detail(openid):
             log.error('get user detail err %s' % err)
             log.error('can not get user detail', exc_info=True)
             return
+        log.info(u'user info: %s' % info)
         social.extra_data.update(info)
         social.save()
 
     # 更新用户的头像和昵称，姓别
     user = social.user
     data = social.extra_data
+    log.info(u'extra_data %s' % data)
     change = False
     if not user.first_name:
         user.first_name = data['nickname']
@@ -144,4 +146,5 @@ def get_user_detail(openid):
         change = True
 
     if change:
+        log.info('user info have been change, save it!')
         user.save()
