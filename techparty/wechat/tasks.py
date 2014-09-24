@@ -117,7 +117,7 @@ def get_user_detail(openid):
     """
     from .utils import get_user_detail
     social = UserSocialAuth.objects.get(uid=openid, provider='weixin')
-    if not 'nickname' in social:
+    if not 'nickname' in social.extra_data:
         # 从微信获取用户数据。
         info, err = get_user_detail(openid)
         if err:
