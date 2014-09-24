@@ -108,7 +108,7 @@ def token_guarantee(func):
         log.info('token to be use %s' % token)
         wxapi._access_token = token
         data, err = func(*args, **kwargs)
-        if err.code in (40001, 42001, 40014):
+        if err and err.code in (40001, 42001, 40014):
             log.info('error token, flush it!')
             cache.delete(ACCESS_TOKEN_CACHE_KEY)
             token = TokenRefresher.refresh_wechat_token()
