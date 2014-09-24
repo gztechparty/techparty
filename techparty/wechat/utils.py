@@ -136,6 +136,8 @@ def _dispatch_message(user, msg_type, content,
     """
 
     rs, err = token_guarantee(wxapi.send_message)(user, msg_type, content)
+    if not err:
+        return
     if err.code == 45015:
         # 用户48小时内无互动, 通过微信号发送
         return send_message_via_account(user, msg_type, content,
