@@ -113,18 +113,18 @@ class RegisterTestCase(WechatTestCase):
         """
         make_user('test_user')
         make_event('Hello Event')
-        rsp = self.send_text('er', user='test_user')  # step 1
+        rsp = self.send_text(u'报名', user='test_user')  # step 1
         obj = objectify.fromstring(rsp)
         self.assertIn('您确认报名参加在', rsp)
-        self.assertEqual('er', obj.WechatlibCommand)
+        self.assertEqual(u'报名', obj.WechatlibCommand)
         self.assertEqual('confirm', obj.WechatlibState)
         context = obj.WechatlibContext
 
-        rsp = self.send_text('1', command='er', state='confirm',
+        rsp = self.send_text('1', command=u'报名', state='confirm',
                              context=context)  #step 2
         obj = objectify.fromstring(rsp)
         self.assertIn('您已成功报名"Hello Event"', rsp)
-        self.assertEqual('er', obj.WechatlibCommand)
+        self.assertEqual(u'报名', obj.WechatlibCommand)
         self.assertEqual('end', obj.WechatlibState)
 
     def test_mulitiple_event(self):

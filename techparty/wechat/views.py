@@ -13,6 +13,7 @@ from techparty.wechat.commands import interactive_cmds
 from yafsm import BaseStateMachine, StateException
 import json
 import random
+import logging
 from . import tasks
 if settings.RUN_ON_SAE:
     import pylibmc
@@ -22,6 +23,7 @@ else:
 import inspect
 import traceback
 User = get_user_model()
+log = logging.getLogger('django')
 
 
 def log_err():
@@ -110,7 +112,13 @@ class TechpartyView(View, WxApplication):
         cmd = text.Content.strip().lower()
         if getattr(text, 'WechatlibCommand', None):
             cmd = text.WechatlibCommand.strip().lower()
-        command = self.get_actions().get(cmd)
+            log.info(u'command get from state %s' % cmd)
+            log.info(u'and its type %s' % type(cmd))
+
+        key = cmd
+        if isinstance(key, unicode):
+            key = cmd.encode('utf-8')
+        command = self.get_actions().get(key)
         if not command:
             # 尝试一下模糊匹配
             blurs = [(k, v) for k, v in self.get_actions().iteritems()

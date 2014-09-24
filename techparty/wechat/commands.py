@@ -25,8 +25,12 @@ def register_cmd(command, name=None, alias=None):
         name = command.COMMAND_NAME
     if not alias:
         alias = command.COMMAND_ALIAS
+    if isinstance(name, unicode):
+        name = name.encode('utf-8')
     interactive_cmds[name] = command
     for al in alias.split(','):
+        if isinstance(al, unicode):
+            al = al.encode('utf-8')
         interactive_cmds[al] = command
 
 
