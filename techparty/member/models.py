@@ -49,7 +49,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         ])
     first_name = models.CharField(u'名字', max_length=30, blank=True)
     last_name = models.CharField(u'姓氏', max_length=30, blank=True)
-    email = models.EmailField(u'邮箱', blank=True)
+    email = models.EmailField(u'邮箱', blank=True, unique=True)
     description = models.TextField(u'个人简介', blank=True, null=True)
     tags = TagField(u'标签')
 
