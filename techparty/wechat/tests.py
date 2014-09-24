@@ -52,6 +52,7 @@ class WechatTestCase(TestCase):
         cache.get = Mock(return_value=None)
         cache.set = Mock()
         tasks.get_user_detail = Mock()
+        tasks.invite_user = Mock()
 
     def send_text(self, text, user='test_user',
                   command=None, state=None, context=None):

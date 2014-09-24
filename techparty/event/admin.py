@@ -37,7 +37,7 @@ class ParticipateAdmin(admin.ModelAdmin):
         for pt in qs:
             pt.confirm_key = uuid4().get_hex()
             pt.checkin_key = uuid4().get_hex()
-            tasks.invite_user.delay(pt, invite_msg(pt))
+            tasks.invite_user.delay(pt)
             pt.status = 1
             pt.save()
 
@@ -71,12 +71,6 @@ class ParticipateAdmin(admin.ModelAdmin):
 admin.site.register(Event, EventAdmin)
 admin.site.register(Participate, ParticipateAdmin)
 admin.site.register(Photo, PhotoAdmin)
-
-
-def invite_msg(pt):
-    tpl = Template(settings.INVITE_MSG)
-    return tpl.render(Context({'user': pt.user, 'event': pt.event,
-                               'participate': pt}))
 
 
 def reject_msg(pt):

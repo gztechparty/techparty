@@ -58,10 +58,15 @@ def send_messages(email_messages):
 
 
 @app.task(name='invite_user', ignore_result=True)
-def invite_user(participate, message):
+def invite_user(participate):
     """生成用户签到二维码，附件发送至用户邮箱。
     上传图片至七牛，通过图文下发至用户微信。
     """
+
+    tpl = Template(settings.INVITE_MSG)
+    message = tpl.render(Context({'user': participate.user,
+                                  'event': participate.event,
+                                  'participate': participate}))
     image_data = qrcode.make('http://techparty.sutui.me/wxcheckin/%s/' %
                              participate.checkin_key)
     if participate.user.email:

@@ -121,6 +121,8 @@ class RegisterEvent(BaseStateMachine):
         except:
             return WxTextResponse(u'小子你摊上事儿了，报名不成功，到微信' +
                                   u'找@jeff_kit 帮你搞定吧！', self.obj)
+        if not event['need_invite']:
+            tasks.invite_user.delay(pt)
         ct = u'您已成功报名"%s",敬请留意邀请信息。' % event['name']
         return WxTextResponse(ct, self.obj)
 

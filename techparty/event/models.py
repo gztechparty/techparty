@@ -32,7 +32,7 @@ class Event(models.Model):
     address = models.CharField(u'会场', max_length=200, blank=True, null=True)
     fee = models.IntegerField(u'费用', default=0)
     need_subject = models.BooleanField(u'报名需分享主题', default=False)
-
+    need_invite = models.BooleanField(u'需要邀请才能参加', default=True)
     create_time = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
@@ -57,6 +57,7 @@ class Event(models.Model):
             'start_time': ts.decode('utf-8'),
             'area': self.area,
             'need_subject': self.need_subject,
+            'need_invite': self.need_invite,
         }
 
     class Meta:
