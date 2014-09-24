@@ -12,10 +12,11 @@ from django.core.validators import validate_email
 from django.core.validators import MaxLengthValidator
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
-import sys
+import logging
 from yafsm import BaseStateMachine
 from social.apps.django_app.default.models import UserSocialAuth
 from . import tasks
+log = logging.getLogger('django')
 
 interactive_cmds = {}
 
@@ -118,11 +119,12 @@ class RegisterEvent(BaseStateMachine):
 
     def register_event(self, event):
         pt = Participate(user=self.user, event_id=event['id'])
+        if not event['need_invite']:
+            pt.status = 1
         try:
             pt.save()
         except IntegrityError:
-            info = sys.exc_info()
-            print info[0], info[1], info[2]
+            log.error('', exc_info=True)
         except:
             return WxTextResponse(u'小子你摊上事儿了，报名不成功，到微信' +
                                   u'找@jeff_kit 帮你搞定吧！', self.obj)
