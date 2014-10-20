@@ -51,9 +51,8 @@ class RegisterEvent(BaseStateMachine):
     def init_context(self):
         events = Event.objects.filter(Q(can_signup_before__gt=datetime.now()) |
                                       Q(start_time__gt=datetime.now()))
-        social = UserSocialAuth.objects.get(user=self.user, provider='weixin')
         return {'events': [e.to_dict() for e in events],
-                'has_info': 'wechat_account' in social.extra_data}
+                'has_info': self.user.email}
 
     ################ Start State ################
 
@@ -106,7 +105,7 @@ class RegisterEvent(BaseStateMachine):
             return WxTextResponse(u'近期暂无活动，感谢您的关注',
                                   self.obj)
         else:
-            return WxTextResponse(u'您还没有绑定微信号，请回复【bd】绑定微信号',
+            return WxTextResponse(u'还不知道您的Email呢，请回复【ei】丰富个人信息吧',
                                   self.obj)
 
     def enter_end_from_confirm(self):

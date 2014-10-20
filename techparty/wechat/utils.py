@@ -97,13 +97,14 @@ class TokenRefresher(object):
                 cls.token_lock.release()
                 try:
                     token = cls.get_access_token(token)
-                    cls.token_result.set(token)
                 except:
+                    token = None
                     log.error(u'获取access_token出错了', exc_info=True)
                     if cls.got_global_lock:
                         rds.delete(ACCESS_TOKEN_REFRESH_FLAG)
                         cls.got_global_lock = False
                 finally:
+                    cls.token_result.set(token)
                     cls.is_refreshing_token = None
         return token
 
