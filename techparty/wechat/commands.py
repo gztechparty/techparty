@@ -106,7 +106,7 @@ class RegisterEvent(BaseStateMachine):
             return WxTextResponse(u'近期暂无活动，感谢您的关注',
                                   self.obj)
         else:
-            return WxTextResponse(u'还没有您的Email和微信呢，先回复【ei】丰富个人信息吧或回复【bd】绑定一下微信号吧',
+            return WxTextResponse(u'还没有您的Email和微信呢，先回复【ei】丰富个人信息吧',
                                   self.obj)
 
     def enter_end_from_confirm(self):
