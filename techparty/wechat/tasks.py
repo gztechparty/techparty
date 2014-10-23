@@ -138,15 +138,15 @@ def get_user_detail(openid):
     data = social.extra_data
     log.info(u'extra_data %s' % data)
     change = False
-    if not user.first_name:
+    if not user.first_name and data.get('nickname', ''):
         user.first_name = data['nickname']
         change = True
 
-    if not user.gendar:
+    if not user.gendar and data.get('sex', ''):
         user.gendar = data['sex']
         change = True
 
-    if not user.avatar:
+    if not user.avatar and data.get('headimgurl', ''):
         user.avatar = data['headimgurl']
         change = True
 
