@@ -132,6 +132,7 @@ class RegisterEvent(BaseStateMachine):
         if not event['need_invite']:
             pt.confirm_key = uuid4().get_hex()
             pt.checkin_key = uuid4().get_hex()
+            pt.save()
             tasks.invite_user.delay(pt)
         ct = u'您已成功报名"%s",敬请留意邀请信息。' % event['name']
         return WxTextResponse(ct, self.obj)
