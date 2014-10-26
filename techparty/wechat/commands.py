@@ -13,6 +13,7 @@ from django.core.validators import MaxLengthValidator
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 import logging
+from uuid import uuid4
 from yafsm import BaseStateMachine
 from social.apps.django_app.default.models import UserSocialAuth
 from . import tasks
