@@ -471,6 +471,7 @@ class ModifyPassword(BaseStateMachine):
             self.error = u'密码需要6位或以上字母、数字，请重新输入：'
             return False
         self.user.set_password(password)
+        self.user.save()
         return True
 
     def enter_end_from_old(self):

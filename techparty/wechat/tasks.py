@@ -120,11 +120,11 @@ def invite_user(participate):
 def get_user_detail(openid):
     """从微信获取用户的详情
     """
-    from .utils import get_user_detail
+    from .utils import get_user_detail as gud
     social = UserSocialAuth.objects.get(uid=openid, provider='weixin')
     if not 'nickname' in social.extra_data:
         # 从微信获取用户数据。
-        info, err = get_user_detail(openid)
+        info, err = gud(openid)
         if err:
             log.error('get user detail err %s' % err)
             log.error('can not get user detail', exc_info=True)
