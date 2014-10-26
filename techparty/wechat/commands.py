@@ -536,9 +536,12 @@ def register_events(wxreq, user):
                 ct = ct + u'%s,您己受邀请参加下面的活动，届时请准时出席！\n' % \
                     user.first_name
                 event = pt.event
-                ct = ct + u"""活动:%s\n地址：%s\n时间：%s\n场地人均消费：%d元\n""" % \
+                key = 'qr/%d/%s.png' % (pt.event.id, pt.checkin_key)
+                qrlink = 'http://techparty.qiniudn.com/' + key
+                ct = ct + u"""活动:%s\n地址：%s\n时间：%s\n场地人均消费：%d元\n签到二维码：%s""" % \
                     (event.name, event.address,
-                     event.start_time, event.fee)
+                     event.start_time, event.fee,
+                     qrlink)
     else:
         ct = u'您目前未报名任何活动'
     return WxTextResponse(ct, wxreq)
